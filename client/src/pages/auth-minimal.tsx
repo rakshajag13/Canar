@@ -162,6 +162,8 @@ export default function AuthMinimal() {
           <p>Email: {email}</p>
           <p>Username: {username}</p>
           <p>Password: {"*".repeat(password.length)}</p>
+          <p>Login pending: {loginMutation.isPending ? 'yes' : 'no'}</p>
+          <p>Register pending: {registerMutation.isPending ? 'yes' : 'no'}</p>
         </div>
       </div>
     </div>

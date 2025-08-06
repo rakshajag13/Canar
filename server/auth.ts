@@ -52,15 +52,25 @@ export function setupAuth(app: Express) {
     }),
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
+  passport.serializeUser((user, done) => {
+    console.log('Serializing user:', user.id);
+    done(null, user.id);
+  });
   passport.deserializeUser(async (id: string, done) => {
-    const user = await storage.getUser(id);
-    done(null, user);
+    try {
+      console.log('Deserializing user ID:', id);
+      const user = await storage.getUser(id);
+      console.log('Found user:', user ? 'yes' : 'no');
+      done(null, user);
+    } catch (error) {
+      console.error('Deserialization error:', error);
+      done(error, null);
+    }
   });
 
   app.post("/api/register", async (req, res, next) => {
     try {
-      const { email, password } = req.body;
+      const { email, username, password } = req.body;
       
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
@@ -69,7 +79,7 @@ export function setupAuth(app: Express) {
 
       const user = await storage.createUser({
         email,
-        username: email,
+        username: username || email,
         password: await hashPassword(password),
       });
 
