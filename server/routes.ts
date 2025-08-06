@@ -7,6 +7,10 @@ import { z } from "zod";
 import path from "path";
 
 function requireAuth(req: any, res: any, next: any) {
+  console.log('Auth check - isAuthenticated:', req.isAuthenticated());
+  console.log('Auth check - user exists:', !!req.user);
+  console.log('Auth check - session:', req.session?.passport);
+  
   if (!req.isAuthenticated() || !req.user) {
     return res.sendStatus(401);
   }
