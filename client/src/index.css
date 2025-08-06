@@ -56,4 +56,25 @@
   body {
     @apply font-sans antialiased bg-background text-foreground;
   }
+
+  /* Fix for input fields to ensure they are clickable and typeable */
+  input[type="email"],
+  input[type="password"],
+  input[type="text"] {
+    pointer-events: auto !important;
+    user-select: auto !important;
+    -webkit-user-select: auto !important;
+    -moz-user-select: auto !important;
+    -ms-user-select: auto !important;
+    cursor: text !important;
+    background: var(--background) !important;
+    opacity: 1 !important;
+  }
+
+  input[type="email"]:focus,
+  input[type="password"]:focus,
+  input[type="text"]:focus {
+    outline: 2px solid var(--ring) !important;
+    outline-offset: 2px !important;
+  }
 }

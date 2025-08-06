@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { setupAuth } from "./auth";
 import { insertSubscriptionSchema, insertProfileSchema, insertEducationSchema, insertProjectSchema, insertSkillSchema, insertExperienceSchema, insertCreditPurchaseSchema } from "@shared/schema";
 import { z } from "zod";
+import path from "path";
 
 function requireAuth(req: any, res: any, next: any) {
   if (!req.isAuthenticated() || !req.user) {
@@ -34,6 +35,11 @@ async function requireCredits(req: any, res: any, next: any) {
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
+
+  // Serve test form for debugging
+  app.get("/test", (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'test_form.html'));
+  });
 
   // Subscription routes
   app.get("/api/subscription/plans", (req, res) => {

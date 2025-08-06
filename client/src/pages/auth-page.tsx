@@ -32,6 +32,14 @@ export default function AuthPage() {
   const { user, loginMutation, registerMutation } = useAuth();
   const [, setLocation] = useLocation();
 
+  // Debug logging
+  useEffect(() => {
+    console.log('AuthPage rendered, isLogin:', isLogin);
+    console.log('User:', user);
+    console.log('Login mutation pending:', loginMutation.isPending);
+    console.log('Register mutation pending:', registerMutation.isPending);
+  }, [isLogin, user, loginMutation.isPending, registerMutation.isPending]);
+
   // Redirect if already logged in
   useEffect(() => {
     if (user) {
@@ -110,6 +118,8 @@ export default function AuthPage() {
                           <Input
                             type="email"
                             placeholder="your@email.com"
+                            autoComplete="email"
+                            style={{ pointerEvents: 'auto', userSelect: 'auto' }}
                             {...field}
                           />
                         </FormControl>
@@ -128,6 +138,8 @@ export default function AuthPage() {
                           <Input
                             type="password"
                             placeholder="••••••••"
+                            autoComplete="current-password"
+                            style={{ pointerEvents: 'auto', userSelect: 'auto' }}
                             {...field}
                           />
                         </FormControl>
@@ -172,6 +184,8 @@ export default function AuthPage() {
                           <Input
                             type="email"
                             placeholder="your@email.com"
+                            autoComplete="email"
+                            style={{ pointerEvents: 'auto', userSelect: 'auto' }}
                             {...field}
                           />
                         </FormControl>
@@ -190,6 +204,8 @@ export default function AuthPage() {
                           <Input
                             type="password"
                             placeholder="••••••••"
+                            autoComplete="new-password"
+                            style={{ pointerEvents: 'auto', userSelect: 'auto' }}
                             {...field}
                           />
                         </FormControl>
@@ -208,6 +224,8 @@ export default function AuthPage() {
                           <Input
                             type="password"
                             placeholder="••••••••"
+                            autoComplete="new-password"
+                            style={{ pointerEvents: 'auto', userSelect: 'auto' }}
                             {...field}
                           />
                         </FormControl>
