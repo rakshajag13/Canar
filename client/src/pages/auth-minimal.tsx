@@ -26,8 +26,8 @@ export default function AuthMinimal() {
       password: password,
     }, {
       onSuccess: () => {
-        // Small delay to ensure session is established
-        setTimeout(() => setLocation("/subscription"), 500);
+        // Force a page reload to ensure session is recognized
+        window.location.href = "/subscription";
       }
     });
   };
@@ -44,8 +44,8 @@ export default function AuthMinimal() {
       password: password,
     }, {
       onSuccess: () => {
-        // Small delay to ensure session is established
-        setTimeout(() => setLocation("/subscription"), 500);
+        // Force a page reload to ensure session is recognized
+        window.location.href = "/subscription";
       }
     });
   };

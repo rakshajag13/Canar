@@ -31,19 +31,18 @@ async function comparePasswords(supplied: string, stored: string) {
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "your-super-secret-key-change-this-in-production",
-    resave: false,
+    resave: true,
     saveUninitialized: true,
     store: storage.sessionStore,
     cookie: {
       secure: false,
-      httpOnly: true,
+      httpOnly: false,
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: 'lax'
     },
-    name: 'canar.sid'
+    name: 'connect.sid'
   };
 
-  app.set("trust proxy", 1);
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
@@ -95,7 +94,11 @@ export function setupAuth(app: Express) {
       });
 
       req.login(user, (err) => {
-        if (err) return next(err);
+        if (err) {
+          console.error("Login after registration failed:", err);
+          return next(err);
+        }
+        console.log("Registration successful, session established");
         res.status(201).json(user);
       });
     } catch (error) {
@@ -105,6 +108,7 @@ export function setupAuth(app: Express) {
   });
 
   app.post("/api/login", passport.authenticate("local"), (req, res) => {
+    console.log("Login successful, session established for user:", req.user?.id);
     res.status(200).json(req.user);
   });
 
@@ -116,6 +120,10 @@ export function setupAuth(app: Express) {
   });
 
   app.get("/api/user", (req, res) => {
+    console.log("User check - authenticated:", req.isAuthenticated());
+    console.log("User check - session:", req.session?.passport);
+    console.log("User check - user:", req.user?.id);
+    
     if (!req.isAuthenticated()) return res.sendStatus(401);
     res.json(req.user);
   });
