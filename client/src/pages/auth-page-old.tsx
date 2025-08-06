@@ -89,17 +89,6 @@ export default function AuthPage() {
     });
   };
 
-  // Fixed input style for compatibility
-  const inputStyle = {
-    pointerEvents: 'auto' as const,
-    userSelect: 'auto' as const,
-    zIndex: 999999,
-    position: 'relative' as const,
-    background: 'white',
-    color: 'black',
-    border: '1px solid #ccc'
-  };
-
   return (
     <div className="min-h-screen grid lg:grid-cols-2">
       {/* Left side - Form */}
@@ -133,7 +122,12 @@ export default function AuthPage() {
                             type="email"
                             placeholder="your@email.com"
                             autoComplete="email"
-                            style={inputStyle}
+                            style={{ 
+                              pointerEvents: 'auto !important', 
+                              userSelect: 'auto !important',
+                              zIndex: 999999,
+                              position: 'relative'
+                            }}
                             className="!pointer-events-auto !user-select-auto"
                             {...field}
                           />
@@ -154,7 +148,12 @@ export default function AuthPage() {
                             type="password"
                             placeholder="••••••••"
                             autoComplete="current-password"
-                            style={inputStyle}
+                            style={{ 
+                              pointerEvents: 'auto !important', 
+                              userSelect: 'auto !important',
+                              zIndex: 999999,
+                              position: 'relative'
+                            }}
                             className="!pointer-events-auto !user-select-auto"
                             {...field}
                           />
@@ -201,28 +200,12 @@ export default function AuthPage() {
                             type="email"
                             placeholder="your@email.com"
                             autoComplete="email"
-                            style={inputStyle}
-                            className="!pointer-events-auto !user-select-auto"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={registerForm.control}
-                    name="username"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Username</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="text"
-                            placeholder="johndoe"
-                            autoComplete="username"
-                            style={inputStyle}
+                            style={{ 
+                              pointerEvents: 'auto !important', 
+                              userSelect: 'auto !important',
+                              zIndex: 999999,
+                              position: 'relative'
+                            }}
                             className="!pointer-events-auto !user-select-auto"
                             {...field}
                           />
@@ -243,7 +226,12 @@ export default function AuthPage() {
                             type="password"
                             placeholder="••••••••"
                             autoComplete="new-password"
-                            style={inputStyle}
+                            style={{ 
+                              pointerEvents: 'auto !important', 
+                              userSelect: 'auto !important',
+                              zIndex: 999999,
+                              position: 'relative'
+                            }}
                             className="!pointer-events-auto !user-select-auto"
                             {...field}
                           />
@@ -264,8 +252,7 @@ export default function AuthPage() {
                             type="password"
                             placeholder="••••••••"
                             autoComplete="new-password"
-                            style={inputStyle}
-                            className="!pointer-events-auto !user-select-auto"
+                            style={{ pointerEvents: 'auto', userSelect: 'auto' }}
                             {...field}
                           />
                         </FormControl>
@@ -319,28 +306,20 @@ export default function AuthPage() {
           
           <div className="space-y-4 text-left">
             <div className="flex items-center space-x-3">
-              <div className="flex-shrink-0 w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
+              <div className="flex-shrink-0 w-2 h-2 bg-white rounded-full"></div>
               <span>Credit-based editing system</span>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="flex-shrink-0 w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <span>PDF export and sharing</span>
+              <div className="flex-shrink-0 w-2 h-2 bg-white rounded-full"></div>
+              <span>Export to professional PDF</span>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="flex-shrink-0 w-5 h-5 bg-white/20 rounded-full flex items-center justify-center">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <span>Professional photo uploads</span>
+              <div className="flex-shrink-0 w-2 h-2 bg-white rounded-full"></div>
+              <span>Share with unique URLs</span>
+            </div>
+            <div className="flex items-center space-x-3">
+              <div className="flex-shrink-0 w-2 h-2 bg-white rounded-full"></div>
+              <span>Upload photos and CV</span>
             </div>
           </div>
         </div>
