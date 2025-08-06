@@ -25,7 +25,10 @@ export default function AuthMinimal() {
       username: email,
       password: password,
     }, {
-      onSuccess: () => setLocation("/subscription")
+      onSuccess: () => {
+        // Small delay to ensure session is established
+        setTimeout(() => setLocation("/subscription"), 500);
+      }
     });
   };
 
@@ -40,7 +43,10 @@ export default function AuthMinimal() {
       username: username,
       password: password,
     }, {
-      onSuccess: () => setLocation("/subscription")
+      onSuccess: () => {
+        // Small delay to ensure session is established
+        setTimeout(() => setLocation("/subscription"), 500);
+      }
     });
   };
 
