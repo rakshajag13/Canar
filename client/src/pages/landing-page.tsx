@@ -17,14 +17,7 @@ export default function LandingPage() {
               </div>
             </div>
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                onClick={() => setLocation("/auth")}
-                className="text-gray-600 hover:text-primary"
-              >
-                Sign In
-              </Button>
-              <Button onClick={() => setLocation("/auth")}>
+              <Button onClick={() => setLocation("/subscription")}>
                 Get Started
               </Button>
             </div>
@@ -49,7 +42,7 @@ export default function LandingPage() {
                   <div className="rounded-md shadow">
                     <Button 
                       size="lg"
-                      onClick={() => setLocation("/auth")}
+                      onClick={() => setLocation("/subscription")}
                       className="w-full md:w-auto px-8 py-4 text-base md:text-lg"
                     >
                       Start Building
@@ -59,10 +52,10 @@ export default function LandingPage() {
                     <Button 
                       variant="outline"
                       size="lg"
-                      onClick={() => setLocation("/auth")}
+                      onClick={() => setLocation("/profile")}
                       className="w-full md:w-auto px-8 py-4 text-base md:text-lg text-primary border-primary hover:bg-primary hover:text-white"
                     >
-                      Sign In
+                      View Demo
                     </Button>
                   </div>
                 </div>

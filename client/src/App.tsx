@@ -20,8 +20,8 @@ function Router() {
       <Route path="/auth" component={AuthPage} />
       <Route path="/debug-auth" component={DebugAuthPage} />
       <Route path="/simple-test" component={SimpleFormTest} />
-      <ProtectedRoute path="/subscription" component={SubscriptionPage} />
-      <ProtectedRoute path="/profile" component={ProfileBuilderPage} />
+      <Route path="/subscription" component={SubscriptionPage} />
+      <Route path="/profile" component={ProfileBuilderPage} />
       <Route component={NotFound} />
     </Switch>
   );

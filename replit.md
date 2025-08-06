@@ -3,11 +3,11 @@
 Canar is a modern Single Page Application (SPA) for building and managing professional profiles with a subscription-based credit system. The platform allows users to create comprehensive profiles with personal information, education, projects, skills, and work experience. Key features include autosave functionality, PDF export, profile sharing, and file uploads for photos and CVs. The application implements a credit-based editing system where users consume credits for each profile modification, encouraging thoughtful updates while generating revenue through subscription plans and credit top-ups.
 
 ## Application Flow
-1. **Landing Page** (`/`) → **Authentication** (`/auth`) → **Subscription** (`/subscription`) → **Profile Builder** (`/profile`)
+1. **Landing Page** (`/`) → **Subscription** (`/subscription`) → **Profile Builder** (`/profile`)
 2. **Credit System**: 5 credits per edit operation with real-time tracking
-3. **Authentication**: Session-based with Passport.js and PostgreSQL storage
+3. **Authentication**: BYPASSED - All routes accessible without authentication
 4. **State Management**: TanStack Query for server state, React Context for authentication
-5. **Protection**: ProtectedRoute component guards subscription and profile pages
+5. **Protection**: ProtectedRoute bypassed - direct access to all pages
 
 # User Preferences
 
