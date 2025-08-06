@@ -17,6 +17,8 @@ import { ShareProfileModal } from "@/components/modals/share-profile-modal";
 import { Plus, Trash2, FileText, Share, Upload, Eye, Edit, GraduationCap, Code, Briefcase, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import debounce from "lodash.debounce";
+import { PhotoUpload, CVUpload } from "@/components/file-upload";
+import { generateProfilePDF } from "@/lib/pdf-generator";
 
 interface ProfileData {
   id?: string;
@@ -248,11 +250,57 @@ export default function ProfileBuilderPage() {
   };
 
   const handleExportPDF = () => {
-    toast({ 
-      title: "PDF Export", 
-      description: "Generating PDF version of your profile...",
+    if (!profile) {
+      toast({
+        title: "No Profile Data",
+        description: "Please fill out your profile first before exporting",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      toast({ 
+        title: "PDF Export", 
+        description: "Generating PDF version of your profile...",
+      });
+      
+      generateProfilePDF(profile);
+      
+      setTimeout(() => {
+        toast({
+          title: "PDF Generated!",
+          description: "Your profile has been downloaded as PDF",
+        });
+      }, 1000);
+    } catch (error) {
+      console.error("PDF generation error:", error);
+      toast({
+        title: "Export Failed",
+        description: "There was an error generating your PDF. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePhotoUpload = (file: File) => {
+    // In a real implementation, this would upload to object storage
+    const photoUrl = URL.createObjectURL(file);
+    updateProfileMutation.mutate({ photoUrl });
+    toast({
+      title: "Photo Uploaded",
+      description: "Your profile photo has been updated!",
     });
-    // Future PDF export implementation
+  };
+
+  const handleCVUpload = (file: File) => {
+    // In a real implementation, this would upload to object storage
+    const cvUrl = URL.createObjectURL(file);
+    updateProfileMutation.mutate({ cvUrl });
+    toast({
+      title: "CV Uploaded",
+      description: "Your CV has been uploaded successfully!",
+    });
   };
 
   if (isLoading) {
@@ -376,34 +424,28 @@ export default function ProfileBuilderPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <Label>Profile Photo</Label>
-                    <div className="mt-2 flex items-center space-x-4">
-                      <div className="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
-                        {profile?.photoUrl ? (
-                          <img 
-                            src={profile.photoUrl} 
-                            alt="Profile" 
-                            className="h-16 w-16 rounded-full object-cover"
-                          />
-                        ) : (
-                          <Upload className="h-6 w-6 text-gray-400" />
-                        )}
-                      </div>
-                      {!isPreviewMode && (
-                        <Button variant="outline" size="sm">
-                          <Upload className="h-4 w-4 mr-2" />
-                          Change Photo
-                        </Button>
-                      )}
+                    <div className="mt-2">
+                      <PhotoUpload
+                        onUpload={handlePhotoUpload}
+                        currentPhoto={profile?.photoUrl}
+                        disabled={isPreviewMode}
+                      />
                     </div>
                   </div>
                   <div>
                     <Label>Resume/CV</Label>
-                    {!isPreviewMode && (
-                      <div className="mt-2 border-2 border-dashed border-gray-300 rounded-md p-6 text-center hover:border-gray-400">
-                        <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                        <p className="text-sm text-gray-600">Upload your CV (PDF, DOC)</p>
-                      </div>
-                    )}
+                    <div className="mt-2">
+                      {!isPreviewMode ? (
+                        <CVUpload onUpload={handleCVUpload} disabled={isPreviewMode} />
+                      ) : (
+                        <div className="border-2 border-gray-200 rounded-md p-6 text-center">
+                          <FileText className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                          <p className="text-sm text-gray-600">
+                            {profile?.cvUrl ? "CV uploaded" : "No CV uploaded"}
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </CardContent>

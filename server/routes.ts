@@ -198,9 +198,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const profile = await storage.createOrUpdateProfile(profileData);
       
-      // Deduct credits (5 credits per edit)
+      // Deduct credits (5 credits per edit) - properly handle the result
       try {
-        await storage.updateSubscriptionCredits(userId, 5);
+        const updatedSubscription = await storage.updateSubscriptionCredits(userId, 5);
+        if (!updatedSubscription) {
+          console.log("Credit deduction failed: insufficient credits or no subscription");
+          // For bypass mode, create a default subscription with credits if none exists
+          const subscription = await storage.getUserSubscription(userId);
+          if (!subscription) {
+            await storage.createSubscription({
+              userId,
+              planType: "premium",
+              creditsAllocated: 1000,
+              creditsRemaining: 995, // 1000 - 5 for this edit
+              active: true,
+              endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
+            });
+          }
+        }
       } catch (creditError) {
         console.log("Credit deduction failed:", creditError);
         // Continue without blocking profile update for bypass mode

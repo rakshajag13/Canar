@@ -1,8 +1,15 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Copy, Linkedin, Twitter, Mail, QrCode } from "lucide-react";
+import { Copy, Share2, ExternalLink } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface ShareProfileModalProps {
@@ -13,117 +20,79 @@ interface ShareProfileModalProps {
 
 export function ShareProfileModal({ open, onClose, shareUrl }: ShareProfileModalProps) {
   const { toast } = useToast();
+  const [isCopying, setIsCopying] = useState(false);
 
-  const copyToClipboard = async () => {
+  const handleCopyUrl = async () => {
     try {
+      setIsCopying(true);
       await navigator.clipboard.writeText(shareUrl);
       toast({
-        title: "URL Copied!",
-        description: "Profile URL has been copied to clipboard.",
+        title: "Link Copied!",
+        description: "Profile link has been copied to your clipboard",
       });
     } catch (error) {
       toast({
         title: "Copy Failed",
-        description: "Could not copy URL to clipboard.",
+        description: "Could not copy link to clipboard",
         variant: "destructive",
       });
+    } finally {
+      setIsCopying(false);
     }
   };
 
-  const shareToLinkedIn = () => {
-    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`;
-    window.open(url, '_blank');
-  };
-
-  const shareToTwitter = () => {
-    const text = "Check out my professional profile!";
-    const url = `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(text)}`;
-    window.open(url, '_blank');
-  };
-
-  const shareViaEmail = () => {
-    const subject = "My Professional Profile";
-    const body = `Hi,\n\nI'd like to share my professional profile with you: ${shareUrl}\n\nBest regards`;
-    const url = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.open(url);
-  };
-
-  const generateQRCode = () => {
-    toast({
-      title: "QR Code",
-      description: "QR code generation feature coming soon!",
-    });
+  const handleOpenProfile = () => {
+    if (shareUrl) {
+      window.open(shareUrl, '_blank');
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share Your Profile</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Share2 className="h-5 w-5" />
+            Share Your Profile
+          </DialogTitle>
+          <DialogDescription>
+            Share your professional profile with others using this public link.
+          </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-6">
-          <div>
-            <Label htmlFor="share-url" className="text-sm font-medium text-gray-700 mb-2 block">
-              Public Profile URL
-            </Label>
-            <div className="flex">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="share-url">Public Profile URL</Label>
+            <div className="flex gap-2">
               <Input
                 id="share-url"
-                value={shareUrl || "Profile not yet available for sharing"}
+                value={shareUrl || "Generate your profile to get a shareable link"}
                 readOnly
-                className="flex-1 bg-gray-50"
+                className="flex-1"
               />
               <Button
-                onClick={copyToClipboard}
-                disabled={!shareUrl}
+                onClick={handleCopyUrl}
+                disabled={!shareUrl || isCopying}
                 size="sm"
-                className="ml-2"
+                variant="outline"
               >
                 <Copy className="h-4 w-4" />
               </Button>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="flex gap-2 pt-4">
             <Button
-              variant="outline"
-              onClick={shareToLinkedIn}
+              onClick={handleOpenProfile}
               disabled={!shareUrl}
-              className="flex items-center justify-center gap-2"
+              className="flex-1"
+              variant="outline"
             >
-              <Linkedin className="h-4 w-4 text-blue-600" />
-              LinkedIn
+              <ExternalLink className="h-4 w-4 mr-2" />
+              Preview Profile
             </Button>
-            
-            <Button
-              variant="outline"
-              onClick={shareToTwitter}
-              disabled={!shareUrl}
-              className="flex items-center justify-center gap-2"
-            >
-              <Twitter className="h-4 w-4 text-blue-400" />
-              Twitter
-            </Button>
-            
-            <Button
-              variant="outline"
-              onClick={shareViaEmail}
-              disabled={!shareUrl}
-              className="flex items-center justify-center gap-2"
-            >
-              <Mail className="h-4 w-4 text-gray-600" />
-              Email
-            </Button>
-            
-            <Button
-              variant="outline"
-              onClick={generateQRCode}
-              disabled={!shareUrl}
-              className="flex items-center justify-center gap-2"
-            >
-              <QrCode className="h-4 w-4 text-gray-600" />
-              QR Code
+            <Button onClick={onClose} className="flex-1">
+              Close
             </Button>
           </div>
         </div>
