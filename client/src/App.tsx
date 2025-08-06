@@ -11,6 +11,7 @@ import AuthPage from "@/pages/auth-page";
 import DebugAuthPage from "@/pages/debug-auth";
 import SubscriptionPage from "@/pages/subscription-page";
 import ProfileBuilderPage from "@/pages/profile-builder-page";
+import SimpleFormTest from "@/pages/simple-form-test";
 
 function Router() {
   return (
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/" component={LandingPage} />
       <Route path="/auth" component={AuthPage} />
       <Route path="/debug-auth" component={DebugAuthPage} />
+      <Route path="/simple-test" component={SimpleFormTest} />
       <ProtectedRoute path="/subscription" component={SubscriptionPage} />
       <ProtectedRoute path="/profile" component={ProfileBuilderPage} />
       <Route component={NotFound} />

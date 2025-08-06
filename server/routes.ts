@@ -45,6 +45,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.sendFile(path.join(process.cwd(), 'simple_input_test.html'));
   });
 
+  app.get("/debug-input", (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'debug_input_test.html'));
+  });
+
   // Subscription routes
   app.get("/api/subscription/plans", (req, res) => {
     res.json([
