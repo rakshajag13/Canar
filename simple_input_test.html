@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Input Test</title>
+    <style>
+        body { margin: 50px; font-family: Arial, sans-serif; }
+        .test-form { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        input { padding: 10px; margin: 10px 0; width: 300px; border: 1px solid #333; }
+        button { padding: 10px 20px; background: blue; color: white; border: none; }
+    </style>
+</head>
+<body>
+    <h1>Input Field Test</h1>
+    
+    <div class="test-form">
+        <h3>Test 1: Basic HTML Form</h3>
+        <form>
+            <input type="email" placeholder="Type here - basic input" name="test1">
+            <input type="password" placeholder="Password here" name="test2">
+            <button type="button" onclick="alert('Values: ' + document.querySelector('[name=test1]').value + ', ' + document.querySelector('[name=test2]').value)">Test Values</button>
+        </form>
+    </div>
+
+    <div class="test-form">
+        <h3>Test 2: React Component Emulation</h3>
+        <div style="border: 1px solid #ccc; padding: 10px;">
+            <input id="reactlike" type="email" placeholder="React-like input" style="pointer-events: auto; user-select: auto;">
+        </div>
+        <button onclick="alert('React-like value: ' + document.getElementById('reactlike').value)">Test React-like</button>
+    </div>
+
+    <script>
+        console.log('Input test page loaded');
+        
+        // Test focus and click events
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', () => console.log('Input focused:', input.placeholder));
+            input.addEventListener('input', (e) => console.log('Input changed:', e.target.value));
+            input.addEventListener('click', () => console.log('Input clicked:', input.placeholder));
+        });
+        
+        // Auto-focus first input after 1 second
+        setTimeout(() => {
+            document.querySelector('input').focus();
+            console.log('Auto-focused first input');
+        }, 1000);
+    </script>
+</body>
+</html>

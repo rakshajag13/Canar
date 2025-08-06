@@ -36,9 +36,13 @@ async function requireCredits(req: any, res: any, next: any) {
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
 
-  // Serve test form for debugging
+  // Serve test forms for debugging
   app.get("/test", (req, res) => {
     res.sendFile(path.join(process.cwd(), 'test_form.html'));
+  });
+  
+  app.get("/input-test", (req, res) => {
+    res.sendFile(path.join(process.cwd(), 'simple_input_test.html'));
   });
 
   // Subscription routes

@@ -57,7 +57,8 @@
     @apply font-sans antialiased bg-background text-foreground;
   }
 
-  /* Fix for input fields to ensure they are clickable and typeable */
+  /* Complete fix for input fields - emergency mode */
+  input,
   input[type="email"],
   input[type="password"],
   input[type="text"] {
@@ -67,14 +68,28 @@
     -moz-user-select: auto !important;
     -ms-user-select: auto !important;
     cursor: text !important;
-    background: var(--background) !important;
+    background: white !important;
+    color: black !important;
     opacity: 1 !important;
+    z-index: 99999 !important;
+    position: relative !important;
   }
 
+  input:focus,
   input[type="email"]:focus,
   input[type="password"]:focus,
   input[type="text"]:focus {
-    outline: 2px solid var(--ring) !important;
+    outline: 2px solid #0079F2 !important;
     outline-offset: 2px !important;
+    background: white !important;
+    color: black !important;
+  }
+
+  /* Override any Replit injected styles that might block inputs */
+  .beacon-highlighter,
+  .beacon-hover-highlighter,
+  .beacon-selected-highlighter {
+    pointer-events: none !important;
+    z-index: -1 !important;
   }
 }

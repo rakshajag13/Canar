@@ -8,6 +8,7 @@ import { ProtectedRoute } from "@/lib/protected-route";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing-page";
 import AuthPage from "@/pages/auth-page";
+import DebugAuthPage from "@/pages/debug-auth";
 import SubscriptionPage from "@/pages/subscription-page";
 import ProfileBuilderPage from "@/pages/profile-builder-page";
 
@@ -16,6 +17,7 @@ function Router() {
     <Switch>
       <Route path="/" component={LandingPage} />
       <Route path="/auth" component={AuthPage} />
+      <Route path="/debug-auth" component={DebugAuthPage} />
       <ProtectedRoute path="/subscription" component={SubscriptionPage} />
       <ProtectedRoute path="/profile" component={ProfileBuilderPage} />
       <Route component={NotFound} />
