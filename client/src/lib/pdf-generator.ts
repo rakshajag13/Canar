@@ -23,7 +23,7 @@ interface ProfileData {
     role: string;
     company: string;
     duration: string;
-    responsibilities: string;
+    description: string;
   }>;
 }
 
@@ -106,8 +106,8 @@ export function generateProfilePDF(profile: ProfileData): void {
       doc.text(`${exp.company} | ${exp.duration}`, margin, yPosition);
       yPosition += 5;
       
-      if (exp.responsibilities) {
-        const respLines = doc.splitTextToSize(exp.responsibilities, pageWidth - 2 * margin);
+      if (exp.description) {
+        const respLines = doc.splitTextToSize(exp.description, pageWidth - 2 * margin);
         doc.text(respLines, margin, yPosition);
         yPosition += respLines.length * 4 + 8;
       }

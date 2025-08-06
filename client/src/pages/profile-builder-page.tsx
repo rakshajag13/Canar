@@ -14,7 +14,7 @@ import { CreditCounter } from "@/components/credit-counter";
 import { AutosaveToast } from "@/components/autosave-toast";
 import { CreditTopupModal } from "@/components/modals/credit-topup-modal";
 import { ShareProfileModal } from "@/components/modals/share-profile-modal";
-import { Plus, Trash2, FileText, Share, Upload, Eye, Edit, GraduationCap, Code, Briefcase, Award } from "lucide-react";
+import { Plus, Trash2, FileText, Share, Upload, Eye, Edit, GraduationCap, Code, Briefcase, Award, ArrowLeft } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import debounce from "lodash.debounce";
 import { PhotoUpload, CVUpload } from "@/components/file-upload";
@@ -319,6 +319,15 @@ export default function ProfileBuilderPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-3">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.location.href = '/'}
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  Back
+                </Button>
                 <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
                   <Briefcase className="w-5 h-5 text-white" />
                 </div>
@@ -352,6 +361,14 @@ export default function ProfileBuilderPage() {
                 credits={credits?.creditsRemaining || 0}
                 onClick={() => setShowCreditModal(true)}
               />
+              <Button
+                onClick={() => setShowCreditModal(true)}
+                size="sm"
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Award className="h-4 w-4" />
+                Buy Credits
+              </Button>
               <Button
                 variant="outline"
                 onClick={handleExportPDF}
