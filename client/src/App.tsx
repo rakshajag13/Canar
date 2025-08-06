@@ -7,7 +7,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing-page";
-import AuthPage from "@/pages/auth-page";
+import AuthPage from "@/pages/auth-minimal";
 import DebugAuthPage from "@/pages/debug-auth";
 import SubscriptionPage from "@/pages/subscription-page";
 import ProfileBuilderPage from "@/pages/profile-builder-page";
