@@ -129,12 +129,19 @@ export default function AuthPage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input
+                          <input
                             type="email"
                             placeholder="your@email.com"
                             autoComplete="email"
-                            style={inputStyle}
-                            className="!pointer-events-auto !user-select-auto"
+                            className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-base text-black placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            style={{
+                              pointerEvents: 'auto',
+                              userSelect: 'auto',
+                              background: 'white',
+                              color: 'black',
+                              zIndex: 999999,
+                              position: 'relative'
+                            }}
                             {...field}
                           />
                         </FormControl>
@@ -197,12 +204,19 @@ export default function AuthPage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input
+                          <input
                             type="email"
                             placeholder="your@email.com"
                             autoComplete="email"
-                            style={inputStyle}
-                            className="!pointer-events-auto !user-select-auto"
+                            className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-base text-black placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            style={{
+                              pointerEvents: 'auto',
+                              userSelect: 'auto',
+                              background: 'white',
+                              color: 'black',
+                              zIndex: 999999,
+                              position: 'relative'
+                            }}
                             {...field}
                           />
                         </FormControl>
@@ -218,12 +232,19 @@ export default function AuthPage() {
                       <FormItem>
                         <FormLabel>Username</FormLabel>
                         <FormControl>
-                          <Input
+                          <input
                             type="text"
                             placeholder="johndoe"
                             autoComplete="username"
-                            style={inputStyle}
-                            className="!pointer-events-auto !user-select-auto"
+                            className="flex h-10 w-full rounded-md border border-input bg-white px-3 py-2 text-base text-black placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            style={{
+                              pointerEvents: 'auto',
+                              userSelect: 'auto',
+                              background: 'white',
+                              color: 'black',
+                              zIndex: 999999,
+                              position: 'relative'
+                            }}
                             {...field}
                           />
                         </FormControl>
