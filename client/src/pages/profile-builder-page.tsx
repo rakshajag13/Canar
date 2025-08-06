@@ -63,12 +63,10 @@ export default function ProfileBuilderPage() {
 
   const { data: profile, isLoading } = useQuery<ProfileData>({
     queryKey: ["/api/profile"],
-    enabled: !!user,
   });
 
   const { data: credits } = useQuery<{creditsRemaining: number, hasSubscription: boolean, planType: string}>({
     queryKey: ["/api/credits"],
-    enabled: !!user,
   });
 
   // Profile update mutation

@@ -73,10 +73,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ]);
   });
 
-  app.post("/api/subscription/subscribe", requireAuth, async (req, res) => {
+  app.post("/api/subscription/subscribe", async (req, res) => {
     try {
       const { planType } = req.body;
-      const userId = req.user!.id;
+      
+      // For bypass mode, use default user
+      const userId = "bypass-user-001";
+      
+      // Ensure user exists
+      let user = await storage.getUser(userId);
+      if (!user) {
+        user = await storage.createUser({
+          id: userId,
+          email: "bypass@canar.com",
+          username: "bypass-user",
+          password: "bypass-password-hash"
+        });
+      }
       
       if (!["Basic", "Premium"].includes(planType)) {
         return res.status(400).json({ message: "Invalid plan type" });
@@ -99,10 +112,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/subscription/credits/topup", requireAuth, async (req, res) => {
+  app.post("/api/subscription/credits/topup", async (req, res) => {
     try {
       const { credits, amount } = req.body;
-      const userId = req.user!.id;
+      const userId = "bypass-user-001";
 
       // Verify user has active subscription
       const subscription = await storage.getUserSubscription(userId);
@@ -128,9 +141,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Credits info
-  app.get("/api/credits", requireAuth, async (req, res) => {
+  app.get("/api/credits", async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = "bypass-user-001";
       const subscription = await storage.getUserSubscription(userId);
       
       if (!subscription) {
@@ -149,9 +162,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Profile routes
-  app.get("/api/profile", requireAuth, async (req, res) => {
+  app.get("/api/profile", async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = "bypass-user-001";
       const profile = await storage.getUserProfile(userId);
       
       if (!profile) {
@@ -179,15 +192,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/profile", requireAuth, requireCredits, async (req, res) => {
+  app.put("/api/profile", async (req, res) => {
     try {
-      const userId = req.user!.id;
+      const userId = "bypass-user-001";
       const profileData = insertProfileSchema.parse({ ...req.body, userId });
       
       const profile = await storage.createOrUpdateProfile(profileData);
       
-      // Deduct credits
-      await storage.updateSubscriptionCredits(userId, 5);
+      // Deduct credits (5 credits per edit)
+      try {
+        await storage.updateSubscriptionCredits(userId, 5);
+      } catch (creditError) {
+        console.log("Credit deduction failed:", creditError);
+        // Continue without blocking profile update for bypass mode
+      }
       
       res.json(profile);
     } catch (error) {
