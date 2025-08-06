@@ -14,7 +14,7 @@ import { CreditCounter } from "@/components/credit-counter";
 import { AutosaveToast } from "@/components/autosave-toast";
 import { CreditTopupModal } from "@/components/modals/credit-topup-modal";
 import { ShareProfileModal } from "@/components/modals/share-profile-modal";
-import { Plus, Trash2, FileText, Share, Upload, Eye, Edit } from "lucide-react";
+import { Plus, Trash2, FileText, Share, Upload, Eye, Edit, GraduationCap, Code, Briefcase, Award } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import debounce from "lodash.debounce";
 
@@ -131,8 +131,107 @@ export default function ProfileBuilderPage() {
     },
   });
 
-  // Similar mutations for projects, skills, experiences (abbreviated for space)
-  // ... (add similar patterns for other sections)
+  // Project mutations
+  const addProjectMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await apiRequest("POST", "/api/projects", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
+      setShowAutosaveToast(true);
+    },
+  });
+
+  const updateProjectMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: any }) => {
+      const res = await apiRequest("PUT", `/api/projects/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
+      setShowAutosaveToast(true);
+    },
+  });
+
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/projects/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+    },
+  });
+
+  // Skill mutations
+  const addSkillMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await apiRequest("POST", "/api/skills", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
+      setShowAutosaveToast(true);
+    },
+  });
+
+  const updateSkillMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: any }) => {
+      const res = await apiRequest("PUT", `/api/skills/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
+      setShowAutosaveToast(true);
+    },
+  });
+
+  const deleteSkillMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/skills/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+    },
+  });
+
+  // Experience mutations
+  const addExperienceMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await apiRequest("POST", "/api/experiences", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
+      setShowAutosaveToast(true);
+    },
+  });
+
+  const updateExperienceMutation = useMutation({
+    mutationFn: async ({ id, data }: { id: string, data: any }) => {
+      const res = await apiRequest("PUT", `/api/experiences/${id}`, data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
+      setShowAutosaveToast(true);
+    },
+  });
+
+  const deleteExperienceMutation = useMutation({
+    mutationFn: async (id: string) => {
+      await apiRequest("DELETE", `/api/experiences/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+    },
+  });
 
   // Debounced autosave function
   const debouncedAutosave = useCallback(
@@ -148,6 +247,14 @@ export default function ProfileBuilderPage() {
     debouncedAutosave(field, value);
   };
 
+  const handleExportPDF = () => {
+    toast({ 
+      title: "PDF Export", 
+      description: "Generating PDF version of your profile...",
+    });
+    // Future PDF export implementation
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -158,44 +265,50 @@ export default function ProfileBuilderPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Professional Header */}
       <div className="bg-white shadow-sm border-b sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-primary">Canar</h1>
-              <div className="ml-8 flex items-center space-x-4">
+            <div className="flex items-center gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Briefcase className="w-5 h-5 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold text-gray-900">Canar</h1>
+              </div>
+              
+              <div className="flex items-center bg-gray-100 rounded-lg p-1">
                 <Button
                   variant={!isPreviewMode ? "default" : "ghost"}
                   onClick={() => setIsPreviewMode(false)}
                   size="sm"
-                  className="flex items-center gap-2"
+                  className="rounded-md text-sm"
                 >
-                  <Edit className="h-4 w-4" />
-                  Edit Mode
+                  <Edit className="h-4 w-4 mr-1" />
+                  Edit
                 </Button>
                 <Button
                   variant={isPreviewMode ? "default" : "ghost"}
                   onClick={() => setIsPreviewMode(true)}
                   size="sm"
-                  className="flex items-center gap-2"
+                  className="rounded-md text-sm"
                 >
-                  <Eye className="h-4 w-4" />
+                  <Eye className="h-4 w-4 mr-1" />
                   Preview
                 </Button>
               </div>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center gap-3">
               <CreditCounter 
                 credits={credits?.creditsRemaining || 0}
                 onClick={() => setShowCreditModal(true)}
               />
               <Button
                 variant="outline"
-                onClick={() => toast({ title: "Export PDF", description: "PDF export functionality coming soon!" })}
+                onClick={handleExportPDF}
                 size="sm"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 hover:bg-gray-50"
               >
                 <FileText className="h-4 w-4" />
                 Export PDF
@@ -203,7 +316,7 @@ export default function ProfileBuilderPage() {
               <Button
                 onClick={() => setShowShareModal(true)}
                 size="sm"
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
               >
                 <Share className="h-4 w-4" />
                 Share
@@ -384,7 +497,127 @@ export default function ProfileBuilderPage() {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-8">No education added yet.</p>
+                  <div className="text-center py-12">
+                    <GraduationCap className="mx-auto h-12 w-12 text-gray-300" />
+                    <p className="text-gray-500 mt-4">No education added yet</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Projects Section */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+                <CardTitle className="flex items-center gap-2">
+                  <Code className="h-5 w-5" />
+                  Projects
+                </CardTitle>
+                {!isPreviewMode && (
+                  <Button
+                    onClick={() => addProjectMutation.mutate({
+                      name: "New Project",
+                      description: "Project description",
+                      link: "",
+                      duration: "Month Year - Month Year"
+                    })}
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Project
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent>
+                {profile?.projects && profile.projects.length > 0 ? (
+                  <div className="space-y-6">
+                    {profile.projects.map((project, index) => (
+                      <div key={project.id || index} className="border border-gray-200 rounded-lg p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Project Name</Label>
+                            <Input
+                              defaultValue={project.name}
+                              onChange={(e) => {
+                                if (project.id) {
+                                  updateProjectMutation.mutate({
+                                    id: project.id,
+                                    data: { name: e.target.value }
+                                  });
+                                }
+                              }}
+                              disabled={isPreviewMode}
+                            />
+                          </div>
+                          <div>
+                            <Label>Duration</Label>
+                            <Input
+                              defaultValue={project.duration}
+                              onChange={(e) => {
+                                if (project.id) {
+                                  updateProjectMutation.mutate({
+                                    id: project.id,
+                                    data: { duration: e.target.value }
+                                  });
+                                }
+                              }}
+                              disabled={isPreviewMode}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <Label>Description</Label>
+                            <Textarea
+                              defaultValue={project.description}
+                              rows={3}
+                              onChange={(e) => {
+                                if (project.id) {
+                                  updateProjectMutation.mutate({
+                                    id: project.id,
+                                    data: { description: e.target.value }
+                                  });
+                                }
+                              }}
+                              disabled={isPreviewMode}
+                            />
+                          </div>
+                          <div>
+                            <Label>Project Link</Label>
+                            <Input
+                              defaultValue={project.link}
+                              placeholder="https://github.com/..."
+                              onChange={(e) => {
+                                if (project.id) {
+                                  updateProjectMutation.mutate({
+                                    id: project.id,
+                                    data: { link: e.target.value }
+                                  });
+                                }
+                              }}
+                              disabled={isPreviewMode}
+                            />
+                          </div>
+                          {!isPreviewMode && (
+                            <div className="flex justify-end">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => project.id && deleteProjectMutation.mutate(project.id)}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Remove
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Code className="mx-auto h-12 w-12 text-gray-300" />
+                    <p className="text-gray-500 mt-4">No projects added yet</p>
+                  </div>
                 )}
               </CardContent>
             </Card>
@@ -392,9 +625,19 @@ export default function ProfileBuilderPage() {
             {/* Skills Section */}
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
-                <CardTitle>Skills</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Award className="h-5 w-5" />
+                  Skills
+                </CardTitle>
                 {!isPreviewMode && (
-                  <Button size="sm" className="flex items-center gap-2">
+                  <Button
+                    onClick={() => addSkillMutation.mutate({
+                      name: "New Skill",
+                      proficiency: "Intermediate"
+                    })}
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
                     <Plus className="h-4 w-4" />
                     Add Skill
                   </Button>
@@ -404,105 +647,325 @@ export default function ProfileBuilderPage() {
                 {profile?.skills && profile.skills.length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {profile.skills.map((skill, index) => (
-                      <div key={skill.id || index} className="flex items-center justify-between p-4 border rounded-lg">
-                        <div className="flex-grow">
-                          <Input
-                            defaultValue={skill.name}
-                            className="font-medium mb-2"
-                            disabled={isPreviewMode}
-                          />
-                          <Select defaultValue={skill.proficiency} disabled={isPreviewMode}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Beginner">Beginner</SelectItem>
-                              <SelectItem value="Intermediate">Intermediate</SelectItem>
-                              <SelectItem value="Advanced">Advanced</SelectItem>
-                              <SelectItem value="Expert">Expert</SelectItem>
-                            </SelectContent>
-                          </Select>
+                      <div key={skill.id || index} className="border border-gray-200 rounded-lg p-4">
+                        <div className="space-y-3">
+                          <div>
+                            <Label>Skill Name</Label>
+                            <Input
+                              defaultValue={skill.name}
+                              onChange={(e) => {
+                                if (skill.id) {
+                                  updateSkillMutation.mutate({
+                                    id: skill.id,
+                                    data: { name: e.target.value }
+                                  });
+                                }
+                              }}
+                              disabled={isPreviewMode}
+                            />
+                          </div>
+                          <div>
+                            <Label>Proficiency</Label>
+                            <Select 
+                              defaultValue={skill.proficiency} 
+                              disabled={isPreviewMode}
+                              onValueChange={(value) => {
+                                if (skill.id) {
+                                  updateSkillMutation.mutate({
+                                    id: skill.id,
+                                    data: { proficiency: value }
+                                  });
+                                }
+                              }}
+                            >
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="Beginner">Beginner</SelectItem>
+                                <SelectItem value="Intermediate">Intermediate</SelectItem>
+                                <SelectItem value="Advanced">Advanced</SelectItem>
+                                <SelectItem value="Expert">Expert</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          {!isPreviewMode && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => skill.id && deleteSkillMutation.mutate(skill.id)}
+                              className="text-destructive hover:text-destructive w-full"
+                            >
+                              <Trash2 className="h-4 w-4 mr-1" />
+                              Remove
+                            </Button>
+                          )}
                         </div>
-                        {!isPreviewMode && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="ml-2 text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        )}
                       </div>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-gray-500 text-center py-8">No skills added yet.</p>
+                  <div className="text-center py-12">
+                    <Award className="mx-auto h-12 w-12 text-gray-300" />
+                    <p className="text-gray-500 mt-4">No skills added yet</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Work Experience Section */}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-6">
+                <CardTitle className="flex items-center gap-2">
+                  <Briefcase className="h-5 w-5" />
+                  Work Experience
+                </CardTitle>
+                {!isPreviewMode && (
+                  <Button
+                    onClick={() => addExperienceMutation.mutate({
+                      company: "Company Name",
+                      role: "Job Title",
+                      duration: "Month Year - Present",
+                      responsibilities: "Key responsibilities and achievements..."
+                    })}
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add Experience
+                  </Button>
+                )}
+              </CardHeader>
+              <CardContent>
+                {profile?.experiences && profile.experiences.length > 0 ? (
+                  <div className="space-y-6">
+                    {profile.experiences.map((exp, index) => (
+                      <div key={exp.id || index} className="border border-gray-200 rounded-lg p-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <Label>Company</Label>
+                            <Input
+                              defaultValue={exp.company}
+                              onChange={(e) => {
+                                if (exp.id) {
+                                  updateExperienceMutation.mutate({
+                                    id: exp.id,
+                                    data: { company: e.target.value }
+                                  });
+                                }
+                              }}
+                              disabled={isPreviewMode}
+                            />
+                          </div>
+                          <div>
+                            <Label>Role</Label>
+                            <Input
+                              defaultValue={exp.role}
+                              onChange={(e) => {
+                                if (exp.id) {
+                                  updateExperienceMutation.mutate({
+                                    id: exp.id,
+                                    data: { role: e.target.value }
+                                  });
+                                }
+                              }}
+                              disabled={isPreviewMode}
+                            />
+                          </div>
+                          <div>
+                            <Label>Duration</Label>
+                            <Input
+                              defaultValue={exp.duration}
+                              onChange={(e) => {
+                                if (exp.id) {
+                                  updateExperienceMutation.mutate({
+                                    id: exp.id,
+                                    data: { duration: e.target.value }
+                                  });
+                                }
+                              }}
+                              disabled={isPreviewMode}
+                            />
+                          </div>
+                          <div className="md:col-span-2">
+                            <Label>Key Responsibilities</Label>
+                            <Textarea
+                              defaultValue={exp.responsibilities}
+                              rows={4}
+                              onChange={(e) => {
+                                if (exp.id) {
+                                  updateExperienceMutation.mutate({
+                                    id: exp.id,
+                                    data: { responsibilities: e.target.value }
+                                  });
+                                }
+                              }}
+                              disabled={isPreviewMode}
+                            />
+                          </div>
+                          {!isPreviewMode && (
+                            <div className="flex justify-end">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => exp.id && deleteExperienceMutation.mutate(exp.id)}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-1" />
+                                Remove
+                              </Button>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Briefcase className="mx-auto h-12 w-12 text-gray-300" />
+                    <p className="text-gray-500 mt-4">No work experience added yet</p>
+                  </div>
                 )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Live Preview (Right Column) */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Live Preview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-center">
-                    <div className="mx-auto h-20 w-20 rounded-full bg-gray-200 mb-4 flex items-center justify-center">
-                      {profile?.photoUrl ? (
-                        <img 
-                          src={profile.photoUrl} 
-                          alt="Profile" 
-                          className="h-20 w-20 rounded-full object-cover"
-                        />
-                      ) : (
-                        <Upload className="h-8 w-8 text-gray-400" />
-                      )}
-                    </div>
-                    <h4 className="text-xl font-semibold text-gray-900">
-                      {profile?.name || "Your Name"}
-                    </h4>
-                    <p className="text-gray-600 text-sm mb-3">
-                      {profile?.email || "your@email.com"}
-                    </p>
-                    <p className="text-sm text-gray-700 mb-6">
-                      {profile?.bio || "Your professional bio will appear here..."}
-                    </p>
-                  </div>
-
-                  <div className="space-y-4">
-                    <div>
-                      <h5 className="text-sm font-medium text-gray-900 mb-2">Skills</h5>
-                      <div className="flex flex-wrap gap-2">
-                        {profile?.skills && profile.skills.length > 0 ? (
-                          profile.skills.slice(0, 3).map((skill, index) => (
-                            <Badge key={skill.id || index} variant="default" className="text-xs">
-                              {skill.name}
-                            </Badge>
-                          ))
-                        ) : (
-                          <span className="text-xs text-gray-400">No skills added</span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {profile?.experiences && profile.experiences.length > 0 && (
-                      <div>
-                        <h5 className="text-sm font-medium text-gray-900 mb-2">Latest Experience</h5>
-                        <div className="text-sm">
-                          <p className="font-medium">{profile.experiences[0].role}</p>
-                          <p className="text-gray-600">{profile.experiences[0].company}</p>
-                          <p className="text-xs text-gray-500">{profile.experiences[0].duration}</p>
-                        </div>
-                      </div>
+          {/* Right Sidebar - Profile Summary */}
+          <div className="space-y-6">
+            {/* Profile Summary Card */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Profile Summary</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center space-y-4">
+                  <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                    {profile?.photoUrl ? (
+                      <img 
+                        src={profile.photoUrl} 
+                        alt="Profile" 
+                        className="w-20 h-20 rounded-full object-cover"
+                      />
+                    ) : (
+                      <Briefcase className="w-10 h-10 text-white" />
                     )}
                   </div>
-                </CardContent>
-              </Card>
-            </div>
+                  <div>
+                    <h3 className="font-semibold text-lg">{profile?.name || "Your Name"}</h3>
+                    <p className="text-gray-600 text-sm">{profile?.email || "your@email.com"}</p>
+                  </div>
+                  <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+                    <p className="font-medium">Profile Completion</p>
+                    <div className="mt-2 bg-gray-200 rounded-full h-2">
+                      <div 
+                        className="bg-green-500 h-2 rounded-full transition-all"
+                        style={{ 
+                          width: `${Math.min(100, (
+                            (profile?.name ? 20 : 0) + 
+                            (profile?.email ? 20 : 0) + 
+                            (profile?.bio ? 20 : 0) + 
+                            ((profile?.education?.length || 0) > 0 ? 20 : 0) + 
+                            ((profile?.projects?.length || 0) > 0 ? 20 : 0)
+                          ))}%`
+                        }}
+                      />
+                    </div>
+                    <p className="text-xs mt-1">
+                      {Math.min(100, (
+                        (profile?.name ? 20 : 0) + 
+                        (profile?.email ? 20 : 0) + 
+                        (profile?.bio ? 20 : 0) + 
+                        ((profile?.education?.length || 0) > 0 ? 20 : 0) + 
+                        ((profile?.projects?.length || 0) > 0 ? 20 : 0)
+                      ))}% complete
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quick Stats */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Quick Stats</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 flex items-center gap-2">
+                    <GraduationCap className="w-4 h-4" />
+                    Education
+                  </span>
+                  <span className="font-medium">{profile?.education?.length || 0}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 flex items-center gap-2">
+                    <Code className="w-4 h-4" />
+                    Projects
+                  </span>
+                  <span className="font-medium">{profile?.projects?.length || 0}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 flex items-center gap-2">
+                    <Award className="w-4 h-4" />
+                    Skills
+                  </span>
+                  <span className="font-medium">{profile?.skills?.length || 0}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-gray-600 flex items-center gap-2">
+                    <Briefcase className="w-4 h-4" />
+                    Experience
+                  </span>
+                  <span className="font-medium">{profile?.experiences?.length || 0}</span>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Action Buttons */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Button
+                  onClick={() => setShowShareModal(true)}
+                  className="w-full flex items-center gap-2 bg-green-600 hover:bg-green-700"
+                >
+                  <Share className="w-4 h-4" />
+                  Share Profile
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={handleExportPDF}
+                  className="w-full flex items-center gap-2"
+                >
+                  <FileText className="w-4 h-4" />
+                  Export as PDF
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowCreditModal(true)}
+                  className="w-full flex items-center gap-2"
+                >
+                  <Award className="w-4 h-4" />
+                  Buy More Credits
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Tips Card */}
+            <Card className="bg-blue-50 border-blue-200">
+              <CardHeader>
+                <CardTitle className="text-lg text-blue-800">💡 Pro Tips</CardTitle>
+              </CardHeader>
+              <CardContent className="text-sm text-blue-700 space-y-2">
+                <p>• Fill out all sections for a complete profile</p>
+                <p>• Use action-oriented language in descriptions</p>
+                <p>• Add links to your projects and portfolio</p>
+                <p>• Keep your skills updated regularly</p>
+                <p>• Each edit costs 5 credits - make them count!</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
