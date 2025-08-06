@@ -77,14 +77,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { planType } = req.body;
       
-      // For bypass mode, use default user
-      const userId = "bypass-user-001";
+      // For bypass mode, use UUID format for user ID
+      const userId = "00000000-0000-0000-0000-000000000001";
       
       // Ensure user exists
       let user = await storage.getUser(userId);
       if (!user) {
         user = await storage.createUser({
-          id: userId,
           email: "bypass@canar.com",
           username: "bypass-user",
           password: "bypass-password-hash"
@@ -115,7 +114,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/subscription/credits/topup", async (req, res) => {
     try {
       const { credits, amount } = req.body;
-      const userId = "bypass-user-001";
+      const userId = "00000000-0000-0000-0000-000000000001";
 
       // Verify user has active subscription
       const subscription = await storage.getUserSubscription(userId);
@@ -143,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Credits info
   app.get("/api/credits", async (req, res) => {
     try {
-      const userId = "bypass-user-001";
+      const userId = "00000000-0000-0000-0000-000000000001";
       const subscription = await storage.getUserSubscription(userId);
       
       if (!subscription) {
@@ -164,7 +163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile routes
   app.get("/api/profile", async (req, res) => {
     try {
-      const userId = "bypass-user-001";
+      const userId = "00000000-0000-0000-0000-000000000001";
       const profile = await storage.getUserProfile(userId);
       
       if (!profile) {
@@ -194,7 +193,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.put("/api/profile", async (req, res) => {
     try {
-      const userId = "bypass-user-001";
+      const userId = "00000000-0000-0000-0000-000000000001";
       const profileData = insertProfileSchema.parse({ ...req.body, userId });
       
       const profile = await storage.createOrUpdateProfile(profileData);
