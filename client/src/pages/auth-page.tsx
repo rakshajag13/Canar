@@ -18,7 +18,7 @@ const loginSchema = z.object({
 });
 
 const registerSchema = loginSchema.extend({
-  confirmPassword: z.string().min(6, "Password must be at least 6 characters"),
+  confirmPassword: z.string().min(1, "Please confirm your password"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -119,7 +119,13 @@ export default function AuthPage() {
                             type="email"
                             placeholder="your@email.com"
                             autoComplete="email"
-                            style={{ pointerEvents: 'auto', userSelect: 'auto' }}
+                            style={{ 
+                              pointerEvents: 'auto !important', 
+                              userSelect: 'auto !important',
+                              zIndex: 999999,
+                              position: 'relative'
+                            }}
+                            className="!pointer-events-auto !user-select-auto"
                             {...field}
                           />
                         </FormControl>
@@ -139,7 +145,13 @@ export default function AuthPage() {
                             type="password"
                             placeholder="••••••••"
                             autoComplete="current-password"
-                            style={{ pointerEvents: 'auto', userSelect: 'auto' }}
+                            style={{ 
+                              pointerEvents: 'auto !important', 
+                              userSelect: 'auto !important',
+                              zIndex: 999999,
+                              position: 'relative'
+                            }}
+                            className="!pointer-events-auto !user-select-auto"
                             {...field}
                           />
                         </FormControl>
@@ -185,7 +197,13 @@ export default function AuthPage() {
                             type="email"
                             placeholder="your@email.com"
                             autoComplete="email"
-                            style={{ pointerEvents: 'auto', userSelect: 'auto' }}
+                            style={{ 
+                              pointerEvents: 'auto !important', 
+                              userSelect: 'auto !important',
+                              zIndex: 999999,
+                              position: 'relative'
+                            }}
+                            className="!pointer-events-auto !user-select-auto"
                             {...field}
                           />
                         </FormControl>
@@ -205,7 +223,13 @@ export default function AuthPage() {
                             type="password"
                             placeholder="••••••••"
                             autoComplete="new-password"
-                            style={{ pointerEvents: 'auto', userSelect: 'auto' }}
+                            style={{ 
+                              pointerEvents: 'auto !important', 
+                              userSelect: 'auto !important',
+                              zIndex: 999999,
+                              position: 'relative'
+                            }}
+                            className="!pointer-events-auto !user-select-auto"
                             {...field}
                           />
                         </FormControl>
