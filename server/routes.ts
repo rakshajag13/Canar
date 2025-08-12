@@ -207,11 +207,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Profile routes
   app.get("/api/profile", requireAuth, async (req, res) => {
     try {
-      console.log("profile route", req.user);
       const userId = getUserId(req);
 
       const profile = await storage.getUserProfile(userId);
-      console.log(profile);
+
       if (!profile) {
         return res.json({
           success: true,

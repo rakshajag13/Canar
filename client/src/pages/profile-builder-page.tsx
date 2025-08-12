@@ -75,6 +75,10 @@ export default function ProfileBuilderPage() {
   });
   const { data: credits } = useQuery<{ creditsRemaining: number, hasSubscription: boolean, planType: string }>({
     queryKey: ["/api/credits"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/credits");
+      return res.json();
+    }
   });
 
   // Profile update mutation
@@ -172,6 +176,19 @@ export default function ProfileBuilderPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
     },
   });
+  //credit mutations
+  const addCreditMutation = useMutation({
+    mutationFn: async ({ credits, amount }: { credits: number, amount: number }) => {
+      const res = await apiRequest("POST", "/api/subscription/credits/topup", { credits, amount });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
+      setShowAutosaveToast(true);
+    },
+  });
+
 
   // Skill mutations
   const addSkillMutation = useMutation({
@@ -365,7 +382,6 @@ export default function ProfileBuilderPage() {
             <div className="flex items-center gap-3">
               <CreditCounter
                 credits={credits?.creditsRemaining || 0}
-                onClick={() => setShowCreditModal(true)}
               />
               <Button
                 onClick={() => setShowCreditModal(true)}
@@ -1040,6 +1056,10 @@ export default function ProfileBuilderPage() {
         open={showCreditModal}
         onClose={() => setShowCreditModal(false)}
         currentCredits={credits?.creditsRemaining || 0}
+        onCreditPurchase={(credits: number, amount: number) => addCreditMutation.mutate({
+          credits,
+          amount
+        })}
       />
 
       <ShareProfileModal

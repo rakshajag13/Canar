@@ -16,6 +16,7 @@ interface CreditTopupModalProps {
   open: boolean;
   onClose: () => void;
   currentCredits: number;
+  onCreditPurchase: (credits: number, amount: number) => void;
 }
 
 const topupOptions = [
@@ -27,7 +28,7 @@ const topupOptions = [
     description: "Perfect for occasional edits"
   },
   {
-    id: "medium", 
+    id: "medium",
     credits: 250,
     price: 1000, // ₹10.00
     popular: true,
@@ -42,7 +43,7 @@ const topupOptions = [
   }
 ];
 
-export function CreditTopupModal({ open, onClose, currentCredits }: CreditTopupModalProps) {
+export function CreditTopupModal({ open, onClose, currentCredits, onCreditPurchase }: CreditTopupModalProps) {
   const { toast } = useToast();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -50,19 +51,20 @@ export function CreditTopupModal({ open, onClose, currentCredits }: CreditTopupM
   const handleTopup = async (option: typeof topupOptions[0]) => {
     setIsProcessing(true);
     setSelectedOption(option.id);
-    
+
     try {
       // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
+      // await new Promise(resolve => setTimeout(resolve, 2000));
+      onCreditPurchase(option.credits, option.price);
+
       toast({
         title: "Credits Added Successfully!",
         description: `${option.credits} credits have been added to your account`,
       });
-      
+
       // In a real implementation, this would trigger a payment flow
       // and then call an API to add credits
-      
+
       onClose();
     } catch (error) {
       toast({
@@ -88,15 +90,14 @@ export function CreditTopupModal({ open, onClose, currentCredits }: CreditTopupM
             You currently have {currentCredits} credits remaining. Each profile edit costs 5 credits.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           <div className="grid gap-3">
             {topupOptions.map((option) => (
-              <Card 
-                key={option.id} 
-                className={`cursor-pointer transition-all hover:shadow-md ${
-                  option.popular ? 'border-blue-500 shadow-sm' : ''
-                }`}
+              <Card
+                key={option.id}
+                className={`cursor-pointer transition-all hover:shadow-md ${option.popular ? 'border-blue-500 shadow-sm' : ''
+                  }`}
                 onClick={() => !isProcessing && handleTopup(option)}
               >
                 <CardHeader className="pb-3">
