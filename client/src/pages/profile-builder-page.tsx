@@ -65,9 +65,15 @@ export default function ProfileBuilderPage() {
 
   const { data: profile, isLoading } = useQuery<ProfileData>({
     queryKey: ["/api/profile"],
+    queryFn: async () => {
+      const res = await apiRequest("GET", "/api/profile");
+      const profileData = await res.json();
+      const { profile } = profileData;
+      delete profileData.profile;
+      return { ...profile, ...profileData };
+    }
   });
-
-  const { data: credits } = useQuery<{creditsRemaining: number, hasSubscription: boolean, planType: string}>({
+  const { data: credits } = useQuery<{ creditsRemaining: number, hasSubscription: boolean, planType: string }>({
     queryKey: ["/api/credits"],
   });
 
@@ -260,13 +266,13 @@ export default function ProfileBuilderPage() {
     }
 
     try {
-      toast({ 
-        title: "PDF Export", 
+      toast({
+        title: "PDF Export",
         description: "Generating PDF version of your profile...",
       });
-      
+
       generateProfilePDF(profile);
-      
+
       setTimeout(() => {
         toast({
           title: "PDF Generated!",
@@ -333,7 +339,7 @@ export default function ProfileBuilderPage() {
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900">Canar</h1>
               </div>
-              
+
               <div className="flex items-center bg-gray-100 rounded-lg p-1">
                 <Button
                   variant={!isPreviewMode ? "default" : "ghost"}
@@ -355,9 +361,9 @@ export default function ProfileBuilderPage() {
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
-              <CreditCounter 
+              <CreditCounter
                 credits={credits?.creditsRemaining || 0}
                 onClick={() => setShowCreditModal(true)}
               />
@@ -425,7 +431,7 @@ export default function ProfileBuilderPage() {
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="bio">Professional Bio</Label>
                   <Textarea
@@ -725,8 +731,8 @@ export default function ProfileBuilderPage() {
                           </div>
                           <div>
                             <Label>Proficiency</Label>
-                            <Select 
-                              defaultValue={skill.proficiency} 
+                            <Select
+                              defaultValue={skill.proficiency}
                               disabled={isPreviewMode}
                               onValueChange={(value) => {
                                 if (skill.id) {
@@ -849,13 +855,13 @@ export default function ProfileBuilderPage() {
                           <div className="md:col-span-2">
                             <Label>Key Responsibilities</Label>
                             <Textarea
-                              defaultValue={exp.responsibilities}
+                              defaultValue={exp.description}
                               rows={4}
                               onChange={(e) => {
                                 if (exp.id) {
                                   updateExperienceMutation.mutate({
                                     id: exp.id,
-                                    data: { responsibilities: e.target.value }
+                                    data: { description: e.target.value }
                                   });
                                 }
                               }}
@@ -900,9 +906,9 @@ export default function ProfileBuilderPage() {
                 <div className="text-center space-y-4">
                   <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                     {profile?.photoUrl ? (
-                      <img 
-                        src={profile.photoUrl} 
-                        alt="Profile" 
+                      <img
+                        src={profile.photoUrl}
+                        alt="Profile"
                         className="w-20 h-20 rounded-full object-cover"
                       />
                     ) : (
@@ -916,14 +922,14 @@ export default function ProfileBuilderPage() {
                   <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
                     <p className="font-medium">Profile Completion</p>
                     <div className="mt-2 bg-gray-200 rounded-full h-2">
-                      <div 
+                      <div
                         className="bg-green-500 h-2 rounded-full transition-all"
-                        style={{ 
+                        style={{
                           width: `${Math.min(100, (
-                            (profile?.name ? 20 : 0) + 
-                            (profile?.email ? 20 : 0) + 
-                            (profile?.bio ? 20 : 0) + 
-                            ((profile?.education?.length || 0) > 0 ? 20 : 0) + 
+                            (profile?.name ? 20 : 0) +
+                            (profile?.email ? 20 : 0) +
+                            (profile?.bio ? 20 : 0) +
+                            ((profile?.education?.length || 0) > 0 ? 20 : 0) +
                             ((profile?.projects?.length || 0) > 0 ? 20 : 0)
                           ))}%`
                         }}
@@ -931,10 +937,10 @@ export default function ProfileBuilderPage() {
                     </div>
                     <p className="text-xs mt-1">
                       {Math.min(100, (
-                        (profile?.name ? 20 : 0) + 
-                        (profile?.email ? 20 : 0) + 
-                        (profile?.bio ? 20 : 0) + 
-                        ((profile?.education?.length || 0) > 0 ? 20 : 0) + 
+                        (profile?.name ? 20 : 0) +
+                        (profile?.email ? 20 : 0) +
+                        (profile?.bio ? 20 : 0) +
+                        ((profile?.education?.length || 0) > 0 ? 20 : 0) +
                         ((profile?.projects?.length || 0) > 0 ? 20 : 0)
                       ))}% complete
                     </p>
@@ -1030,20 +1036,20 @@ export default function ProfileBuilderPage() {
       </div>
 
       {/* Modals */}
-      <CreditTopupModal 
+      <CreditTopupModal
         open={showCreditModal}
         onClose={() => setShowCreditModal(false)}
         currentCredits={credits?.creditsRemaining || 0}
       />
-      
-      <ShareProfileModal 
+
+      <ShareProfileModal
         open={showShareModal}
         onClose={() => setShowShareModal(false)}
         shareUrl={profile?.shareSlug ? `${window.location.origin}/profile/share/${profile.shareSlug}` : ""}
       />
 
       {/* Autosave Toast */}
-      <AutosaveToast 
+      <AutosaveToast
         show={showAutosaveToast}
         onClose={() => setShowAutosaveToast(false)}
         creditsRemaining={credits?.creditsRemaining || 0}

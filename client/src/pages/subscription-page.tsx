@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -7,6 +7,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 import { Check, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useSubscription } from "@/hooks/use-auth";
 
 interface Plan {
   id: string;
@@ -19,9 +20,22 @@ interface Plan {
 export default function SubscriptionPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { hasActiveSubscription } = useSubscription();
+
+  // Redirect to profile page if user already has an active subscription
+  useEffect(() => {
+    if (hasActiveSubscription) {
+      setLocation("/profile");
+    }
+  }, [hasActiveSubscription, setLocation]);
 
   const { data: plans, isLoading } = useQuery<Plan[]>({
-    queryKey: ["/api/subscription/plans"],
+    queryKey: ["getPlans"],
+    queryFn: async () => {
+      const planResponse = await apiRequest("GET", "/api/subscription/plans");
+      const planData = await planResponse.json();
+      return planData.plans;
+    }
   });
 
   const subscribeMutation = useMutation({
@@ -46,12 +60,18 @@ export default function SubscriptionPage() {
     },
   });
 
-  if (isLoading) {
+  // Show loading while checking subscription status or loading plans
+  if (isLoading || hasActiveSubscription === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
+  }
+
+  // Don't render anything if redirecting
+  if (hasActiveSubscription) {
+    return null;
   }
 
   return (
@@ -64,8 +84,8 @@ export default function SubscriptionPage() {
 
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-2 max-w-4xl mx-auto">
           {plans?.map((plan) => (
-            <Card 
-              key={plan.id} 
+            <Card
+              key={plan.id}
               className={`relative overflow-hidden ${plan.id === 'premium' ? 'border-2 border-primary shadow-lg' : ''}`}
             >
               {plan.id === 'premium' && (
@@ -75,17 +95,17 @@ export default function SubscriptionPage() {
                   </Badge>
                 </div>
               )}
-              
+
               <CardContent className="p-8">
                 <div className="text-center">
                   <h3 className="text-2xl font-semibold text-gray-900 mb-4">{plan.name}</h3>
                   <p className="text-gray-600 mb-8">
-                    {plan.id === 'basic' 
-                      ? 'Perfect for getting started with professional profiles' 
+                    {plan.id === 'basic'
+                      ? 'Perfect for getting started with professional profiles'
                       : 'Best value for power users who edit frequently'
                     }
                   </p>
-                  
+
                   <div className="mb-8">
                     <div className="flex items-baseline justify-center">
                       <span className="text-5xl font-bold text-gray-900">
