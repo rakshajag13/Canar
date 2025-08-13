@@ -306,24 +306,76 @@ export default function ProfileBuilderPage() {
     }
   };
 
-  const handlePhotoUpload = (file: File) => {
-    // In a real implementation, this would upload to object storage
-    const photoUrl = URL.createObjectURL(file);
-    updateProfileMutation.mutate({ photoUrl });
-    toast({
-      title: "Photo Uploaded",
-      description: "Your profile photo has been updated!",
-    });
+  const handlePhotoUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("photo", file);
+
+      const response = await fetch("/api/upload/photo", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        updateProfileMutation.mutate({ photoUrl: result.fileUrl });
+        toast({
+          title: "Photo Uploaded",
+          description: "Your profile photo has been updated!",
+        });
+      } else {
+        throw new Error(result.message || "Upload failed");
+      }
+    } catch (error) {
+      console.error("Photo upload error:", error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload photo. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleCVUpload = (file: File) => {
-    // In a real implementation, this would upload to object storage
-    const cvUrl = URL.createObjectURL(file);
-    updateProfileMutation.mutate({ cvUrl });
-    toast({
-      title: "CV Uploaded",
-      description: "Your CV has been uploaded successfully!",
-    });
+  const handleCVUpload = async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("cv", file);
+
+      const response = await fetch("/api/upload/cv", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        throw new Error("Upload failed");
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        updateProfileMutation.mutate({ cvUrl: result.fileUrl });
+        toast({
+          title: "CV Uploaded",
+          description: "Your CV has been uploaded successfully!",
+        });
+      } else {
+        throw new Error(result.message || "Upload failed");
+      }
+    } catch (error) {
+      console.error("CV upload error:", error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload CV. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {

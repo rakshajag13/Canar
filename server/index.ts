@@ -4,6 +4,13 @@ import { setupVite, serveStatic, log } from "./vite";
 import { db } from "./db";
 import { sql } from "drizzle-orm";
 import { setupDatabase, validateDatabase } from "./db-setup";
+import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
+
+// Load environment variables from .env file first
+const __dirname = dirname(fileURLToPath(import.meta.url));
+dotenv.config({ path: resolve(__dirname, "../.env") });
 
 const app = express();
 app.use(express.json());

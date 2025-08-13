@@ -1,19 +1,22 @@
 import type { Express } from "express";
+import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, requireAuth, requireTenantAccess } from "./auth";
 import { SubscriptionService } from "./subscription-service";
+import { S3Service } from "./s3-service";
 import {
-  insertSubscriptionSchema,
   insertProfileSchema,
   insertEducationSchema,
   insertProjectSchema,
   insertSkillSchema,
   insertExperienceSchema,
-  insertCreditPurchaseSchema,
 } from "@shared/schema";
 import { z } from "zod";
 import path from "path";
+import { randomBytes } from "crypto";
+import fs from "fs";
+import multer from "multer";
 
 function requireAuthLocal(req: any, res: any, next: any) {
   console.log("Auth check - isAuthenticated:", req.isAuthenticated());
@@ -66,6 +69,32 @@ function getErrorMessage(error: unknown): string | undefined {
   }
   return String(error);
 }
+
+// Helper function to generate share slug
+function generateShareSlug(): string {
+  return randomBytes(8).toString("hex");
+}
+
+// Configure multer for file uploads (memory storage for S3 upload)
+const upload = multer({
+  storage: multer.memoryStorage(), // Store in memory for S3 upload
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    // Allow only PDF files for CV uploads
+    if (file.fieldname === "cv" && file.mimetype !== "application/pdf") {
+      cb(new Error("Only PDF files are allowed for CV upload"));
+      return;
+    }
+    // Allow images for photo uploads
+    if (file.fieldname === "photo" && !file.mimetype.startsWith("image/")) {
+      cb(new Error("Only image files are allowed for photo upload"));
+      return;
+    }
+    cb(null, true);
+  },
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   setupAuth(app);
@@ -143,13 +172,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const userId = getUserId(req);
 
-      // Verify user has active subscription
-      const subscription = await storage.getUserSubscription(userId);
-      if (!subscription || !subscription.active) {
-        return res.status(403).json({
-          success: false,
-          message: "Active subscription required for credit top-up",
+      // Get or create subscription for bypass mode
+      let subscription = await storage.getUserSubscription(userId);
+      if (!subscription) {
+        // Create a default subscription for bypass mode
+        subscription = await storage.createSubscription({
+          userId,
+          planType: "Premium",
+          creditsAllocated: credits,
+          creditsRemaining: credits,
+          active: true,
+          endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
         });
+      } else {
+        // Add credits to existing subscription
+        await storage.addCreditsToSubscription(userId, credits);
       }
 
       // Create credit purchase record
@@ -159,14 +196,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         amount,
       });
 
-      // Add credits to subscription
-      await storage.addCreditsToSubscription(userId, credits);
-
       res.json({
         success: true,
         message: "Credits added successfully",
         credits,
-        newBalance: subscription.creditsRemaining + credits,
+        newBalance: (subscription.creditsRemaining || 0) + credits,
       });
     } catch (error) {
       console.error("Error adding credits:", error);
@@ -185,6 +219,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/credits", requireAuth, async (req, res) => {
     try {
       const userId = getUserId(req);
+
+      // Get or create subscription for bypass mode
+      let subscription = await storage.getUserSubscription(userId);
+      if (!subscription) {
+        // Create a default subscription for bypass mode
+        subscription = await storage.createSubscription({
+          userId,
+          planType: "Premium",
+          creditsAllocated: 1000,
+          creditsRemaining: 1000,
+          active: true,
+          endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+        });
+      }
+
       const status = await SubscriptionService.getSubscriptionStatus(userId);
 
       res.json({
@@ -251,12 +300,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/profile", async (req, res) => {
+  app.put("/api/profile", requireAuth, async (req, res) => {
     try {
       const userId = getUserId(req);
-      const profileData = insertProfileSchema.parse({ ...req.body, userId });
 
-      const profile = await storage.createOrUpdateProfile(profileData);
+      // Generate shareSlug if not provided
+      const profileData = {
+        ...req.body,
+        userId,
+        shareSlug: req.body.shareSlug || generateShareSlug(),
+      };
+
+      const validatedData = insertProfileSchema.parse(profileData);
+
+      const profile = await storage.createOrUpdateProfile(validatedData);
 
       // Deduct credits (5 credits per edit) - properly handle the result
       try {
@@ -874,6 +931,232 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+
+  // File upload routes
+  app.post(
+    "/api/upload/cv",
+    requireAuth,
+    upload.single("cv"),
+    async (req, res) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({
+            success: false,
+            message: "No file uploaded",
+          });
+        }
+
+        const userId = getUserId(req);
+
+        // Check if S3 is configured, fallback to local storage if not
+        let fileUrl: string;
+        if (S3Service.isConfigured()) {
+          // Upload to S3
+          const uploadResult = await S3Service.uploadFile(req.file, "cv");
+          fileUrl = uploadResult.fileUrl;
+        } else {
+          // Fallback to local storage
+          const uploadDir = path.join(process.cwd(), "uploads");
+          if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+          }
+
+          const uniqueSuffix =
+            Date.now() + "-" + Math.round(Math.random() * 1e9);
+          const fileName = `cv-${uniqueSuffix}${path.extname(
+            req.file.originalname
+          )}`;
+          const filePath = path.join(uploadDir, fileName);
+
+          fs.writeFileSync(filePath, req.file.buffer);
+          fileUrl = `/uploads/${fileName}`;
+        }
+
+        // Update profile with CV URL
+        const profile = await storage.getUserProfile(userId);
+        if (profile) {
+          await storage.createOrUpdateProfile({
+            ...profile,
+            cvUrl: fileUrl,
+          });
+        }
+
+        res.json({
+          success: true,
+          fileUrl,
+          message: "CV uploaded successfully",
+        });
+      } catch (error) {
+        console.error("Error uploading CV:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error uploading CV",
+          error:
+            process.env.NODE_ENV === "development"
+              ? getErrorMessage(error)
+              : undefined,
+        });
+      }
+    }
+  );
+
+  app.post(
+    "/api/upload/photo",
+    requireAuth,
+    upload.single("photo"),
+    async (req, res) => {
+      try {
+        if (!req.file) {
+          return res.status(400).json({
+            success: false,
+            message: "No file uploaded",
+          });
+        }
+
+        const userId = getUserId(req);
+
+        // Check if S3 is configured, fallback to local storage if not
+        let fileUrl: string;
+        if (S3Service.isConfigured()) {
+          // Upload to S3
+          const uploadResult = await S3Service.uploadFile(req.file, "photos");
+          fileUrl = uploadResult.fileUrl;
+        } else {
+          // Fallback to local storage
+          const uploadDir = path.join(process.cwd(), "uploads");
+          if (!fs.existsSync(uploadDir)) {
+            fs.mkdirSync(uploadDir, { recursive: true });
+          }
+
+          const uniqueSuffix =
+            Date.now() + "-" + Math.round(Math.random() * 1e9);
+          const fileName = `photo-${uniqueSuffix}${path.extname(
+            req.file.originalname
+          )}`;
+          const filePath = path.join(uploadDir, fileName);
+
+          fs.writeFileSync(filePath, req.file.buffer);
+          fileUrl = `/uploads/${fileName}`;
+        }
+
+        // Update profile with photo URL
+        const profile = await storage.getUserProfile(userId);
+        if (profile) {
+          await storage.createOrUpdateProfile({
+            ...profile,
+            photoUrl: fileUrl,
+          });
+        }
+
+        res.json({
+          success: true,
+          fileUrl,
+          message: "Photo uploaded successfully",
+        });
+      } catch (error) {
+        console.error("Error uploading photo:", error);
+        res.status(500).json({
+          success: false,
+          message: "Error uploading photo",
+          error:
+            process.env.NODE_ENV === "development"
+              ? getErrorMessage(error)
+              : undefined,
+        });
+      }
+    }
+  );
+
+  // S3 presigned URL endpoints
+  app.post("/api/upload/presigned-url", requireAuth, async (req, res) => {
+    try {
+      const { fileName, contentType, folder } = req.body;
+
+      if (!fileName || !contentType) {
+        return res.status(400).json({
+          success: false,
+          message: "fileName and contentType are required",
+        });
+      }
+
+      if (!S3Service.isConfigured()) {
+        return res.status(500).json({
+          success: false,
+          message: "S3 is not configured",
+        });
+      }
+
+      const { uploadUrl, key } = await S3Service.generatePresignedUrl(
+        fileName,
+        contentType,
+        folder || "uploads"
+      );
+
+      res.json({
+        success: true,
+        uploadUrl,
+        key,
+        message: "Presigned URL generated successfully",
+      });
+    } catch (error) {
+      console.error("Error generating presigned URL:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error generating presigned URL",
+        error:
+          process.env.NODE_ENV === "development"
+            ? getErrorMessage(error)
+            : undefined,
+      });
+    }
+  });
+
+  // Delete file endpoint
+  app.delete("/api/upload/delete", requireAuth, async (req, res) => {
+    try {
+      const { fileUrl } = req.body;
+
+      if (!fileUrl) {
+        return res.status(400).json({
+          success: false,
+          message: "fileUrl is required",
+        });
+      }
+
+      if (S3Service.isConfigured()) {
+        // Extract S3 key from URL and delete from S3
+        const key = S3Service.extractKeyFromUrl(fileUrl);
+        if (key) {
+          await S3Service.deleteFile(key);
+        }
+      } else {
+        // For local files, delete from local storage
+        const fileName = fileUrl.replace("/uploads/", "");
+        const filePath = path.join(process.cwd(), "uploads", fileName);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+        }
+      }
+
+      res.json({
+        success: true,
+        message: "File deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting file:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error deleting file",
+        error:
+          process.env.NODE_ENV === "development"
+            ? getErrorMessage(error)
+            : undefined,
+      });
+    }
+  });
+
+  // Serve uploaded files (fallback for local storage)
+  app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
   const httpServer = createServer(app);
   return httpServer;
