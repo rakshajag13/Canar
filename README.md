@@ -5,6 +5,7 @@ A comprehensive SaaS application for building professional profiles with advance
 ## 🚀 Features
 
 ### Authentication & Security
+
 - **Dual Authentication Modes**: Session-based (development) and JWT (production)
 - **Multi-tenant Architecture**: Complete tenant isolation
 - **Password Security**: bcrypt hashing with salt
@@ -12,6 +13,7 @@ A comprehensive SaaS application for building professional profiles with advance
 - **Rate Limiting**: Built-in protection against abuse
 
 ### Subscription Management
+
 - **Credit-based System**: Pay-per-edit model
 - **Plan Management**: Basic and Premium plans
 - **Automatic Deduction**: Credits deducted on profile edits
@@ -19,12 +21,14 @@ A comprehensive SaaS application for building professional profiles with advance
 - **Top-up System**: Additional credit purchases
 
 ### Database & Performance
+
 - **PostgreSQL Integration**: Robust relational database
 - **Automated Setup**: Database initialization and validation
 - **Performance Indexes**: Optimized queries
 - **Migration Ready**: Drizzle ORM with schema management
 
 ### Client-Side Features
+
 - **Protected Routes**: Authentication and subscription checks
 - **Real-time Updates**: Live credit balance and subscription status
 - **Responsive UI**: Modern, mobile-friendly interface
@@ -33,6 +37,7 @@ A comprehensive SaaS application for building professional profiles with advance
 ## 🏗️ Architecture Overview
 
 ### Service-Oriented Design
+
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Auth Service  │    │ Subscription    │    │   Profile       │
@@ -56,6 +61,7 @@ A comprehensive SaaS application for building professional profiles with advance
 ```
 
 ### Authentication Flow
+
 ```
 1. User Registration → Password Hashing → User Creation
 2. User Login → Credential Validation → Token/Session Creation
@@ -66,11 +72,13 @@ A comprehensive SaaS application for building professional profiles with advance
 ## 🛠️ Installation & Setup
 
 ### Prerequisites
-- Node.js 18+ 
+
+- Node.js 18+
 - PostgreSQL 12+
 - npm or yarn
 
 ### 1. Clone and Install Dependencies
+
 ```bash
 git clone <repository-url>
 cd CPM
@@ -78,6 +86,7 @@ npm install --legacy-peer-deps
 ```
 
 ### 2. Environment Configuration
+
 Create a `.env` file in the root directory:
 
 ```bash
@@ -99,12 +108,14 @@ CORS_ORIGIN=http://localhost:3000
 ```
 
 ### 3. Database Setup
+
 ```bash
 # The database will be automatically set up on first run
 npm run dev
 ```
 
 ### 4. Run the Application
+
 ```bash
 # Development mode
 npm run dev
@@ -117,6 +128,7 @@ npm start
 ## 🧪 Testing
 
 ### Run Authentication Tests
+
 ```bash
 # Install test dependencies
 npm install node-fetch --legacy-peer-deps
@@ -126,6 +138,7 @@ node test-auth.js
 ```
 
 The test suite validates:
+
 - ✅ User registration and login
 - ✅ JWT/Session authentication
 - ✅ Subscription creation and management
@@ -135,6 +148,7 @@ The test suite validates:
 - ✅ Database integration
 
 ### Test Coverage
+
 - **17 comprehensive tests** covering the entire authentication flow
 - **Database validation** and connection testing
 - **API endpoint testing** with proper error handling
@@ -146,25 +160,31 @@ The test suite validates:
 ### Authentication Strategies
 
 #### Session-Based (Development)
+
 ```bash
 AUTH_STRATEGY=session
 ```
+
 - Simple to debug
 - Built-in CSRF protection
 - No client-side token management
 
 #### JWT-Based (Production)
+
 ```bash
 AUTH_STRATEGY=jwt
 ```
+
 - Stateless and scalable
 - Works with microservices
 - Requires proper token management
 
 #### Hybrid (Recommended)
+
 ```bash
 AUTH_STRATEGY=hybrid
 ```
+
 - Best of both worlds
 - Session for development, JWT for production
 - Flexible deployment options
@@ -172,11 +192,13 @@ AUTH_STRATEGY=hybrid
 ### Subscription Plans
 
 #### Basic Plan
+
 - **Price**: ₹1,999/month
 - **Credits**: 500 editing credits
 - **Features**: PDF export, profile sharing, photo upload
 
 #### Premium Plan
+
 - **Price**: ₹2,999/month
 - **Credits**: 1,000 editing credits
 - **Features**: All Basic features + priority support
@@ -184,6 +206,7 @@ AUTH_STRATEGY=hybrid
 ## 📊 API Endpoints
 
 ### Authentication
+
 ```
 POST /api/register          # User registration
 POST /api/login            # User login
@@ -193,6 +216,7 @@ GET  /api/auth/health      # Health check
 ```
 
 ### Subscription
+
 ```
 GET  /api/subscription/plans     # Get available plans
 POST /api/subscription/subscribe # Create subscription
@@ -201,6 +225,7 @@ POST /api/subscription/credits/topup # Add credits
 ```
 
 ### Profile Management
+
 ```
 GET  /api/profile              # Get user profile
 PUT  /api/profile              # Update profile (5 credits)
@@ -213,6 +238,7 @@ DELETE /api/education/:id      # Delete education
 ## 🔒 Security Features
 
 ### Implemented Security Measures
+
 - ✅ **Password Hashing**: bcrypt with salt
 - ✅ **JWT Token Validation**: Secure token verification
 - ✅ **Tenant Isolation**: User data separation
@@ -221,52 +247,82 @@ DELETE /api/education/:id      # Delete education
 - ✅ **Rate Limiting**: Basic request throttling
 
 ### Security Best Practices
+
 - **Token Storage**: httpOnly cookies for refresh tokens
 - **Password Policy**: Strong password requirements
 - **Session Management**: Secure session configuration
 - **Error Handling**: No sensitive data in error messages
 - **Database Security**: Prepared statements and validation
 
-## 🚀 Production Deployment
+## 🚀 AWS Cloud Deployment
 
-### Environment Variables
+### Quick Deployment
+
 ```bash
-# Production Configuration
-NODE_ENV=production
-AUTH_STRATEGY=jwt
-JWT_SECRET=your-super-secure-production-secret
-DATABASE_URL=your-production-database-url
-REDIS_URL=your-redis-url-for-caching
+# Set environment variables
+export DB_PASSWORD="your-secure-password"
+export AWS_REGION="us-east-1"
 
-# Security
-CORS_ORIGIN=https://yourdomain.com
-RATE_LIMIT_WINDOW=15m
-RATE_LIMIT_MAX_REQUESTS=100
-
-# Monitoring
-SENTRY_DSN=your-sentry-dsn
-LOG_LEVEL=info
+# Run automated deployment
+chmod +x deploy.sh
+./deploy.sh
 ```
 
-### Deployment Checklist
-- [ ] Set secure environment variables
-- [ ] Configure production database
-- [ ] Set up SSL/TLS certificates
-- [ ] Configure reverse proxy (nginx)
-- [ ] Set up monitoring and logging
-- [ ] Implement backup strategies
-- [ ] Configure rate limiting
-- [ ] Set up CI/CD pipeline
+### AWS Architecture
+
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Route 53      │    │   CloudFront    │    │   S3 Static     │
+│   (DNS)         │────│   (CDN)         │────│   (Frontend)    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Application   │    │   RDS           │    │   ElastiCache   │
+│   Load Balancer │────│   PostgreSQL    │────│   Redis         │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │
+         ▼
+┌─────────────────┐
+│   ECS Fargate   │
+│   (Backend)     │
+└─────────────────┘
+```
+
+### Production Features
+
+- ✅ **Multi-AZ Deployment**: High availability across availability zones
+- ✅ **Auto-scaling**: ECS services scale based on demand
+- ✅ **Load Balancing**: Application Load Balancer with health checks
+- ✅ **Database**: RDS PostgreSQL with automated backups
+- ✅ **Caching**: ElastiCache Redis for performance
+- ✅ **CDN**: CloudFront for global content delivery
+- ✅ **SSL/TLS**: HTTPS encryption with ACM certificates
+- ✅ **Monitoring**: CloudWatch metrics and logging
+- ✅ **CI/CD**: Automated deployment pipeline
+
+### Estimated Monthly Costs: $126-265
+
+- ECS Fargate: $50-100
+- RDS PostgreSQL: $30-60
+- ElastiCache Redis: $15-30
+- Application Load Balancer: $20-40
+- CloudFront: $5-15
+- Route 53: $0.50
+- S3: $1-5
+- CloudWatch: $5-15
 
 ## 📈 Performance Optimization
 
 ### Database Optimization
+
 - **Indexes**: Optimized for common queries
 - **Connection Pooling**: Efficient database connections
 - **Query Optimization**: Selective field loading
 - **Caching**: Redis integration for frequently accessed data
 
 ### API Optimization
+
 - **Response Caching**: Cache static data
 - **Pagination**: Large dataset handling
 - **Compression**: Gzip response compression
@@ -275,12 +331,14 @@ LOG_LEVEL=info
 ## 🔍 Monitoring & Observability
 
 ### Metrics to Track
+
 - **Authentication**: Login success/failure rates
 - **Subscription**: Plan conversion rates
 - **Performance**: API response times
 - **Security**: Failed authentication attempts
 
 ### Logging
+
 - **Structured Logging**: JSON format for easy parsing
 - **Error Tracking**: Comprehensive error logging
 - **Audit Trail**: User action logging
@@ -289,6 +347,7 @@ LOG_LEVEL=info
 ## 🤝 Contributing
 
 ### Development Workflow
+
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
@@ -296,6 +355,7 @@ LOG_LEVEL=info
 5. Submit a pull request
 
 ### Code Standards
+
 - **TypeScript**: Strict type checking
 - **ESLint**: Code quality enforcement
 - **Prettier**: Code formatting
@@ -304,13 +364,13 @@ LOG_LEVEL=info
 ## 📚 Documentation
 
 ### Additional Resources
-- [Authentication Analysis](./AUTHENTICATION_ANALYSIS.md) - Detailed architecture analysis
-- [API Documentation](./docs/api.md) - Complete API reference
-- [Database Schema](./shared/schema.ts) - Database structure
-- [Deployment Guide](./docs/deployment.md) - Production deployment
+
+- [Technical Implementation](./TECHNICAL_IMPLEMENTATION.md) - Detailed implementation analysis
+- [AWS Deployment Guide](./AWS_DEPLOYMENT.md) - Complete deployment instructions
 
 ### Architecture Decisions
-- **JWT vs Sessions**: See [Authentication Analysis](./AUTHENTICATION_ANALYSIS.md)
+
+- **JWT vs Sessions**: Hybrid approach for flexibility
 - **Database Design**: Optimized for multi-tenancy
 - **Service Architecture**: Modular and scalable design
 - **Security Model**: Defense in depth approach
@@ -318,13 +378,15 @@ LOG_LEVEL=info
 ## 🆘 Support
 
 ### Common Issues
+
 1. **Database Connection**: Check DATABASE_URL and PostgreSQL service
 2. **Authentication Errors**: Verify JWT_SECRET and session configuration
 3. **Credit Deduction**: Ensure subscription is active and credits available
 4. **CORS Issues**: Configure CORS_ORIGIN for your domain
 
 ### Getting Help
-- Check the [Authentication Analysis](./AUTHENTICATION_ANALYSIS.md) for detailed explanations
+
+- Check the [Technical Implementation](./TECHNICAL_IMPLEMENTATION.md) for detailed explanations
 - Run the test suite to validate your setup
 - Review the API documentation for endpoint details
 - Check the logs for detailed error information
