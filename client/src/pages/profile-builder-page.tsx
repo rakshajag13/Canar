@@ -93,12 +93,13 @@ export default function ProfileBuilderPage() {
       setShowAutosaveToast(true);
     },
     onError: (error: Error) => {
-      if (error.message.includes("Insufficient credits")) {
+      if (error.message.includes("Insufficient credits") || error.message.includes("Insufficient Credits")) {
         toast({
           title: "Insufficient Credits",
           description: "Please top-up your credits to continue editing.",
           variant: "destructive",
         });
+        setShowCreditModal(true);
       } else {
         toast({
           title: "Save Failed",
@@ -120,6 +121,22 @@ export default function ProfileBuilderPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
       setShowAutosaveToast(true);
     },
+    onError: (error: Error) => {
+      if (error.message.includes("Insufficient credits") || error.message.includes("Insufficient Credits")) {
+        toast({
+          title: "Insufficient Credits",
+          description: "Please top-up your credits to continue editing.",
+          variant: "destructive",
+        });
+        setShowCreditModal(true);
+      } else {
+        toast({
+          title: "Add Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    },
   });
 
   const updateEducationMutation = useMutation({
@@ -131,6 +148,22 @@ export default function ProfileBuilderPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
       queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
       setShowAutosaveToast(true);
+    },
+    onError: (error: Error) => {
+      if (error.message.includes("Insufficient credits") || error.message.includes("Insufficient Credits")) {
+        toast({
+          title: "Insufficient Credits",
+          description: "Please top-up your credits to continue editing.",
+          variant: "destructive",
+        });
+        setShowCreditModal(true);
+      } else {
+        toast({
+          title: "Update Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -154,6 +187,22 @@ export default function ProfileBuilderPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
       setShowAutosaveToast(true);
     },
+    onError: (error: Error) => {
+      if (error.message.includes("Insufficient credits") || error.message.includes("Insufficient Credits")) {
+        toast({
+          title: "Insufficient Credits",
+          description: "Please top-up your credits to continue editing.",
+          variant: "destructive",
+        });
+        setShowCreditModal(true);
+      } else {
+        toast({
+          title: "Add Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    },
   });
 
   const updateProjectMutation = useMutation({
@@ -165,6 +214,22 @@ export default function ProfileBuilderPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
       queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
       setShowAutosaveToast(true);
+    },
+    onError: (error: Error) => {
+      if (error.message.includes("Insufficient credits") || error.message.includes("Insufficient Credits")) {
+        toast({
+          title: "Insufficient Credits",
+          description: "Please top-up your credits to continue editing.",
+          variant: "destructive",
+        });
+        setShowCreditModal(true);
+      } else {
+        toast({
+          title: "Update Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -201,6 +266,22 @@ export default function ProfileBuilderPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
       setShowAutosaveToast(true);
     },
+    onError: (error: Error) => {
+      if (error.message.includes("Insufficient credits") || error.message.includes("Insufficient Credits")) {
+        toast({
+          title: "Insufficient Credits",
+          description: "Please top-up your credits to continue editing.",
+          variant: "destructive",
+        });
+        setShowCreditModal(true);
+      } else {
+        toast({
+          title: "Add Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    },
   });
 
   const updateSkillMutation = useMutation({
@@ -212,6 +293,22 @@ export default function ProfileBuilderPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/profile"] });
       queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
       setShowAutosaveToast(true);
+    },
+    onError: (error: Error) => {
+      if (error.message.includes("Insufficient credits") || error.message.includes("Insufficient Credits")) {
+        toast({
+          title: "Insufficient Credits",
+          description: "Please top-up your credits to continue editing.",
+          variant: "destructive",
+        });
+        setShowCreditModal(true);
+      } else {
+        toast({
+          title: "Update Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 
@@ -235,6 +332,22 @@ export default function ProfileBuilderPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
       setShowAutosaveToast(true);
     },
+    onError: (error: Error) => {
+      if (error.message.includes("Insufficient credits") || error.message.includes("Insufficient Credits")) {
+        toast({
+          title: "Insufficient Credits",
+          description: "Please top-up your credits to continue editing.",
+          variant: "destructive",
+        });
+        setShowCreditModal(true);
+      } else {
+        toast({
+          title: "Add Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    },
   });
 
   const updateExperienceMutation = useMutation({
@@ -247,6 +360,22 @@ export default function ProfileBuilderPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/credits"] });
       setShowAutosaveToast(true);
     },
+    onError: (error: Error) => {
+      if (error.message.includes("Insufficient credits") || error.message.includes("Insufficient Credits")) {
+        toast({
+          title: "Insufficient Credits",
+          description: "Please top-up your credits to continue editing.",
+          variant: "destructive",
+        });
+        setShowCreditModal(true);
+      } else {
+        toast({
+          title: "Update Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+    },
   });
 
   const deleteExperienceMutation = useMutation({
@@ -258,14 +387,17 @@ export default function ProfileBuilderPage() {
     },
   });
 
+  // Check if user can edit (has sufficient credits)
+  const canEdit = credits?.creditsRemaining && credits.creditsRemaining >= 5;
+
   // Debounced autosave function
   const debouncedAutosave = useCallback(
     debounce((field: string, value: string) => {
-      if (credits?.creditsRemaining && credits.creditsRemaining >= 5) {
+      if (canEdit) {
         updateProfileMutation.mutate({ [field]: value });
       }
     }, 1000),
-    [credits?.creditsRemaining]
+    [canEdit]
   );
 
   const handleInputChange = (field: string, value: string) => {
@@ -467,6 +599,32 @@ export default function ProfileBuilderPage() {
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Credit Warning Banner */}
+        {!canEdit && credits && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
+            <div className="flex items-center gap-3">
+              <div className="flex-shrink-0">
+                <Award className="h-5 w-5 text-red-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-red-800">
+                  Insufficient Credits
+                </h3>
+                <p className="text-sm text-red-700 mt-1">
+                  You need at least 5 credits to edit your profile. You currently have {credits.creditsRemaining} credits remaining.
+                </p>
+              </div>
+              <Button
+                onClick={() => setShowCreditModal(true)}
+                size="sm"
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                Buy Credits
+              </Button>
+            </div>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Profile Sections (Left Column) */}
           <div className="lg:col-span-2 space-y-8">
@@ -484,7 +642,7 @@ export default function ProfileBuilderPage() {
                       placeholder="Your full name"
                       defaultValue={profile?.name || ""}
                       onChange={(e) => handleInputChange("name", e.target.value)}
-                      disabled={isPreviewMode}
+                      disabled={isPreviewMode || !canEdit}
                     />
                   </div>
                   <div>
@@ -495,7 +653,7 @@ export default function ProfileBuilderPage() {
                       placeholder="your@email.com"
                       defaultValue={profile?.email || ""}
                       onChange={(e) => handleInputChange("email", e.target.value)}
-                      disabled={isPreviewMode}
+                      disabled={isPreviewMode || !canEdit}
                     />
                   </div>
                 </div>
@@ -508,7 +666,7 @@ export default function ProfileBuilderPage() {
                     rows={4}
                     defaultValue={profile?.bio || ""}
                     onChange={(e) => handleInputChange("bio", e.target.value)}
-                    disabled={isPreviewMode}
+                    disabled={isPreviewMode || !canEdit}
                   />
                 </div>
 
@@ -519,7 +677,7 @@ export default function ProfileBuilderPage() {
                       <PhotoUpload
                         onUpload={handlePhotoUpload}
                         currentPhoto={profile?.photoUrl}
-                        disabled={isPreviewMode}
+                        disabled={isPreviewMode || !canEdit}
                       />
                     </div>
                   </div>
@@ -527,7 +685,7 @@ export default function ProfileBuilderPage() {
                     <Label>Resume/CV</Label>
                     <div className="mt-2">
                       {!isPreviewMode ? (
-                        <CVUpload onUpload={handleCVUpload} disabled={isPreviewMode} />
+                        <CVUpload onUpload={handleCVUpload} disabled={isPreviewMode || !canEdit} />
                       ) : (
                         <div className="border-2 border-gray-200 rounded-md p-6 text-center">
                           <FileText className="mx-auto h-8 w-8 text-gray-400 mb-2" />
@@ -555,6 +713,7 @@ export default function ProfileBuilderPage() {
                     })}
                     size="sm"
                     className="flex items-center gap-2"
+                    disabled={!canEdit}
                   >
                     <Plus className="h-4 w-4" />
                     Add Education
@@ -579,7 +738,7 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           <div>
@@ -594,7 +753,7 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           <div>
@@ -609,7 +768,7 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           {!isPreviewMode && (
@@ -655,6 +814,7 @@ export default function ProfileBuilderPage() {
                     })}
                     size="sm"
                     className="flex items-center gap-2"
+                    disabled={!canEdit}
                   >
                     <Plus className="h-4 w-4" />
                     Add Project
@@ -679,7 +839,7 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           <div>
@@ -694,7 +854,7 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           <div className="md:col-span-2">
@@ -710,7 +870,7 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           <div>
@@ -726,7 +886,7 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           {!isPreviewMode && (
@@ -770,6 +930,7 @@ export default function ProfileBuilderPage() {
                     })}
                     size="sm"
                     className="flex items-center gap-2"
+                    disabled={!canEdit}
                   >
                     <Plus className="h-4 w-4" />
                     Add Skill
@@ -794,14 +955,14 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           <div>
                             <Label>Proficiency</Label>
                             <Select
                               defaultValue={skill.proficiency}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                               onValueChange={(value) => {
                                 if (skill.id) {
                                   updateSkillMutation.mutate({
@@ -863,6 +1024,7 @@ export default function ProfileBuilderPage() {
                     })}
                     size="sm"
                     className="flex items-center gap-2"
+                    disabled={!canEdit}
                   >
                     <Plus className="h-4 w-4" />
                     Add Experience
@@ -887,7 +1049,7 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           <div>
@@ -902,7 +1064,7 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           <div>
@@ -917,7 +1079,7 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           <div className="md:col-span-2">
@@ -933,7 +1095,7 @@ export default function ProfileBuilderPage() {
                                   });
                                 }
                               }}
-                              disabled={isPreviewMode}
+                              disabled={isPreviewMode || !canEdit}
                             />
                           </div>
                           {!isPreviewMode && (

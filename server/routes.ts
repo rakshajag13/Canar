@@ -304,6 +304,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = getUserId(req);
 
+      // Check credits before processing the update
+      const subscription = await storage.getUserSubscription(userId);
+      if (!subscription || !subscription.active) {
+        return res.status(403).json({
+          success: false,
+          message: "Active subscription required to edit profile",
+        });
+      }
+
+      if (subscription.creditsRemaining < 5) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Insufficient credits. Please top-up your credits to continue editing.",
+        });
+      }
+
       // Generate shareSlug if not provided
       const profileData = {
         ...req.body,
@@ -315,38 +332,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const profile = await storage.createOrUpdateProfile(validatedData);
 
-      // Deduct credits (5 credits per edit) - properly handle the result
-      try {
-        const updatedSubscription = await storage.updateSubscriptionCredits(
-          userId,
-          5
-        );
-        if (!updatedSubscription) {
-          console.log(
-            "Credit deduction failed: insufficient credits or no subscription"
-          );
-          // For bypass mode, create a default subscription with credits if none exists
-          const subscription = await storage.getUserSubscription(userId);
-          if (!subscription) {
-            await storage.createSubscription({
-              userId,
-              planType: "Premium",
-              creditsAllocated: 1000,
-              creditsRemaining: 995, // 1000 - 5 for this edit
-              active: true,
-              endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
-            });
-          }
-        }
-      } catch (creditError) {
-        console.log("Credit deduction failed:", creditError);
-        // Continue without blocking profile update for bypass mode
+      // Deduct credits (5 credits per edit)
+      const updatedSubscription = await storage.updateSubscriptionCredits(
+        userId,
+        5
+      );
+
+      if (!updatedSubscription) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to deduct credits. Please try again.",
+        });
       }
 
       res.json({
         success: true,
         profile,
         message: "Profile updated successfully",
+        creditsRemaining: updatedSubscription.creditsRemaining,
       });
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -390,9 +393,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/education", async (req, res) => {
+  app.post("/api/education", requireAuth, async (req, res) => {
     try {
       const userId = getUserId(req);
+
+      // Check credits before processing
+      const subscription = await storage.getUserSubscription(userId);
+      if (!subscription || !subscription.active) {
+        return res.status(403).json({
+          success: false,
+          message: "Active subscription required to add education",
+        });
+      }
+
+      if (subscription.creditsRemaining < 5) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Insufficient credits. Please top-up your credits to continue editing.",
+        });
+      }
+
       const educationData = insertEducationSchema.parse({
         ...req.body,
         userId,
@@ -401,16 +422,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const education = await storage.createEducation(educationData);
 
       // Deduct credits
-      try {
-        await storage.updateSubscriptionCredits(userId, 5);
-      } catch (creditError) {
-        console.log("Credit deduction failed:", creditError);
+      const updatedSubscription = await storage.updateSubscriptionCredits(
+        userId,
+        5
+      );
+      if (!updatedSubscription) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to deduct credits. Please try again.",
+        });
       }
 
       res.json({
         success: true,
         education,
         message: "Education added successfully",
+        creditsRemaining: updatedSubscription.creditsRemaining,
       });
     } catch (error) {
       console.error("Error creating education:", error);
@@ -432,10 +459,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/education/:id", async (req, res) => {
+  app.put("/api/education/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const userId = getUserId(req);
+
+      // Check credits before processing
+      const subscription = await storage.getUserSubscription(userId);
+      if (!subscription || !subscription.active) {
+        return res.status(403).json({
+          success: false,
+          message: "Active subscription required to update education",
+        });
+      }
+
+      if (subscription.creditsRemaining < 5) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Insufficient credits. Please top-up your credits to continue editing.",
+        });
+      }
+
       const educationData = insertEducationSchema.partial().parse(req.body);
 
       const education = await storage.updateEducation(id, educationData);
@@ -448,16 +493,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Deduct credits
-      try {
-        await storage.updateSubscriptionCredits(userId, 5);
-      } catch (creditError) {
-        console.log("Credit deduction failed:", creditError);
+      const updatedSubscription = await storage.updateSubscriptionCredits(
+        userId,
+        5
+      );
+      if (!updatedSubscription) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to deduct credits. Please try again.",
+        });
       }
 
       res.json({
         success: true,
         education,
         message: "Education updated successfully",
+        creditsRemaining: updatedSubscription.creditsRemaining,
       });
     } catch (error) {
       console.error("Error updating education:", error);
@@ -522,24 +573,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/projects", async (req, res) => {
+  app.post("/api/projects", requireAuth, async (req, res) => {
     try {
       const userId = getUserId(req);
+
+      // Check credits before processing
+      const subscription = await storage.getUserSubscription(userId);
+      if (!subscription || !subscription.active) {
+        return res.status(403).json({
+          success: false,
+          message: "Active subscription required to add projects",
+        });
+      }
+
+      if (subscription.creditsRemaining < 5) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Insufficient credits. Please top-up your credits to continue editing.",
+        });
+      }
+
       const projectData = insertProjectSchema.parse({ ...req.body, userId });
 
       const project = await storage.createProject(projectData);
 
       // Deduct credits
-      try {
-        await storage.updateSubscriptionCredits(userId, 5);
-      } catch (creditError) {
-        console.log("Credit deduction failed:", creditError);
+      const updatedSubscription = await storage.updateSubscriptionCredits(
+        userId,
+        5
+      );
+      if (!updatedSubscription) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to deduct credits. Please try again.",
+        });
       }
 
       res.json({
         success: true,
         project,
         message: "Project added successfully",
+        creditsRemaining: updatedSubscription.creditsRemaining,
       });
     } catch (error) {
       console.error("Error creating project:", error);
@@ -561,10 +636,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/projects/:id", async (req, res) => {
+  app.put("/api/projects/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const userId = getUserId(req);
+
+      // Check credits before processing
+      const subscription = await storage.getUserSubscription(userId);
+      if (!subscription || !subscription.active) {
+        return res.status(403).json({
+          success: false,
+          message: "Active subscription required to update projects",
+        });
+      }
+
+      if (subscription.creditsRemaining < 5) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Insufficient credits. Please top-up your credits to continue editing.",
+        });
+      }
+
       const projectData = insertProjectSchema.partial().parse(req.body);
 
       const project = await storage.updateProject(id, projectData);
@@ -577,16 +670,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Deduct credits
-      try {
-        await storage.updateSubscriptionCredits(userId, 5);
-      } catch (creditError) {
-        console.log("Credit deduction failed:", creditError);
+      const updatedSubscription = await storage.updateSubscriptionCredits(
+        userId,
+        5
+      );
+      if (!updatedSubscription) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to deduct credits. Please try again.",
+        });
       }
 
       res.json({
         success: true,
         project,
         message: "Project updated successfully",
+        creditsRemaining: updatedSubscription.creditsRemaining,
       });
     } catch (error) {
       console.error("Error updating project:", error);
@@ -651,24 +750,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/skills", async (req, res) => {
+  app.post("/api/skills", requireAuth, async (req, res) => {
     try {
       const userId = getUserId(req);
+
+      // Check credits before processing
+      const subscription = await storage.getUserSubscription(userId);
+      if (!subscription || !subscription.active) {
+        return res.status(403).json({
+          success: false,
+          message: "Active subscription required to add skills",
+        });
+      }
+
+      if (subscription.creditsRemaining < 5) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Insufficient credits. Please top-up your credits to continue editing.",
+        });
+      }
+
       const skillData = insertSkillSchema.parse({ ...req.body, userId });
 
       const skill = await storage.createSkill(skillData);
 
       // Deduct credits
-      try {
-        await storage.updateSubscriptionCredits(userId, 5);
-      } catch (creditError) {
-        console.log("Credit deduction failed:", creditError);
+      const updatedSubscription = await storage.updateSubscriptionCredits(
+        userId,
+        5
+      );
+      if (!updatedSubscription) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to deduct credits. Please try again.",
+        });
       }
 
       res.json({
         success: true,
         skill,
         message: "Skill added successfully",
+        creditsRemaining: updatedSubscription.creditsRemaining,
       });
     } catch (error) {
       console.error("Error creating skill:", error);
@@ -690,10 +813,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/skills/:id", async (req, res) => {
+  app.put("/api/skills/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const userId = getUserId(req);
+
+      // Check credits before processing
+      const subscription = await storage.getUserSubscription(userId);
+      if (!subscription || !subscription.active) {
+        return res.status(403).json({
+          success: false,
+          message: "Active subscription required to update skills",
+        });
+      }
+
+      if (subscription.creditsRemaining < 5) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Insufficient credits. Please top-up your credits to continue editing.",
+        });
+      }
+
       const skillData = insertSkillSchema.partial().parse(req.body);
 
       const skill = await storage.updateSkill(id, skillData);
@@ -706,16 +847,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Deduct credits
-      try {
-        await storage.updateSubscriptionCredits(userId, 5);
-      } catch (creditError) {
-        console.log("Credit deduction failed:", creditError);
+      const updatedSubscription = await storage.updateSubscriptionCredits(
+        userId,
+        5
+      );
+      if (!updatedSubscription) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to deduct credits. Please try again.",
+        });
       }
 
       res.json({
         success: true,
         skill,
         message: "Skill updated successfully",
+        creditsRemaining: updatedSubscription.creditsRemaining,
       });
     } catch (error) {
       console.error("Error updating skill:", error);
@@ -780,9 +927,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/experiences", async (req, res) => {
+  app.post("/api/experiences", requireAuth, async (req, res) => {
     try {
       const userId = getUserId(req);
+
+      // Check credits before processing
+      const subscription = await storage.getUserSubscription(userId);
+      if (!subscription || !subscription.active) {
+        return res.status(403).json({
+          success: false,
+          message: "Active subscription required to add experience",
+        });
+      }
+
+      if (subscription.creditsRemaining < 5) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Insufficient credits. Please top-up your credits to continue editing.",
+        });
+      }
+
       const experienceData = insertExperienceSchema.parse({
         ...req.body,
         userId,
@@ -791,16 +956,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const experience = await storage.createExperience(experienceData);
 
       // Deduct credits
-      try {
-        await storage.updateSubscriptionCredits(userId, 5);
-      } catch (creditError) {
-        console.log("Credit deduction failed:", creditError);
+      const updatedSubscription = await storage.updateSubscriptionCredits(
+        userId,
+        5
+      );
+      if (!updatedSubscription) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to deduct credits. Please try again.",
+        });
       }
 
       res.json({
         success: true,
         experience,
         message: "Experience added successfully",
+        creditsRemaining: updatedSubscription.creditsRemaining,
       });
     } catch (error) {
       console.error("Error creating experience:", error);
@@ -822,10 +993,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/experiences/:id", async (req, res) => {
+  app.put("/api/experiences/:id", requireAuth, async (req, res) => {
     try {
       const { id } = req.params;
       const userId = getUserId(req);
+
+      // Check credits before processing
+      const subscription = await storage.getUserSubscription(userId);
+      if (!subscription || !subscription.active) {
+        return res.status(403).json({
+          success: false,
+          message: "Active subscription required to update experience",
+        });
+      }
+
+      if (subscription.creditsRemaining < 5) {
+        return res.status(403).json({
+          success: false,
+          message:
+            "Insufficient credits. Please top-up your credits to continue editing.",
+        });
+      }
+
       const experienceData = insertExperienceSchema.partial().parse(req.body);
 
       const experience = await storage.updateExperience(id, experienceData);
@@ -838,16 +1027,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Deduct credits
-      try {
-        await storage.updateSubscriptionCredits(userId, 5);
-      } catch (creditError) {
-        console.log("Credit deduction failed:", creditError);
+      const updatedSubscription = await storage.updateSubscriptionCredits(
+        userId,
+        5
+      );
+      if (!updatedSubscription) {
+        return res.status(500).json({
+          success: false,
+          message: "Failed to deduct credits. Please try again.",
+        });
       }
 
       res.json({
         success: true,
         experience,
         message: "Experience updated successfully",
+        creditsRemaining: updatedSubscription.creditsRemaining,
       });
     } catch (error) {
       console.error("Error updating experience:", error);
